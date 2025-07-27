@@ -4,13 +4,11 @@
     <title>Upload File</title>
 </head>
 <body>
-    <h2>Upload Your File</h2>
-
     @if(session('success'))
         <p style="color: green;">{{ session('success') }}</p>
     @endif
 
-    <form method="POST" action="{{ route('upload.file.store') }}" enctype="multipart/form-data">
+    <form action="{{ route('upload.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="file" name="file" required>
         <button type="submit">Upload</button>

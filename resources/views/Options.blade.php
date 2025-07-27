@@ -46,7 +46,7 @@
     <div class="mt-4 d-flex justify-content-center gap-3">
         <a href="{{ route('bluetooth') }}" class="btn btn-primary btn-lg">Bluetooth</a>
         <a href="{{ route('USBFD') }}" class="btn btn-primary btn-lg">USB Flash Drive</a>
-        <a href="#" class="btn btn-success btn-lg">QR Code</a>
+        <a href="{{ route('qr.code') }}" class="btn btn-success btn-lg">QR Code</a>
     </div>
 </div>  
 

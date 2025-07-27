@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BluetoothController;
 use App\Http\Controllers\USBController;
-
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\QRCodeController;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Http\Controllers\FileUploadController;
 
 
 // Start screen
@@ -16,6 +19,14 @@ Route::get('/start', function () {
 Route::get('/options', function () {
     return view('options');
 })->name('options');
+
+Route::get('/qr-code', [QrCodeController::class, 'show'])->name('qr.code');
+Route::get('/upload', function () {
+    return view('upload'); // or your actual upload logic/view
+})->name('upload.file');
+
+Route::get('/upload', [FileUploadController::class, 'showForm'])->name('upload.form');
+Route::post('/upload', [FileUploadController::class, 'store'])->name('upload.store');
 
 // Bluetooth functionality
 Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth');

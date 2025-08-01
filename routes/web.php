@@ -40,6 +40,13 @@ Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD_pre
 Route::post('/USBFD/print', [USBController::class, 'print'])->name('USBFD.print');
 Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD.preview');
 
+Route::get('/pricing', function () {
+    $data = session('data'); // print settings
+    return view('pricing', compact('data'));
+})->name('pricing');
+
+Route::post('/print/summary', [PrintSummaryController::class, 'show'])->name('print.summary');
+
 
 
 

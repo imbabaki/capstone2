@@ -1,5 +1,5 @@
 <h2>Print Settings</h2>
-<a href="{{ route('admin.print-settings.create') }}">Add</a>
+<a href="{{ route('print-settings.create') }}">Add</a>
 
 
 @if(session('success'))
@@ -22,7 +22,7 @@
                 <td>{{ $setting->color }}</td>
                 <td>{{ $setting->price }}</td>
                 <td>
-                    <form action="{{ route('admin.print-settings.destroy', $setting) }}" method="POST">
+                    <form action="{{ route('print-settings.destroy', $setting) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" onclick="return confirm('Delete this setting?')">Delete</button>

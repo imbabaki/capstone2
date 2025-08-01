@@ -8,6 +8,7 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\QRCodeController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Admin\PrintSettingController;
 
 
 // Start screen
@@ -40,13 +41,10 @@ Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD_pre
 Route::post('/USBFD/print', [USBController::class, 'print'])->name('USBFD.print');
 Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD.preview');
 
-Route::get('/pricing', function () {
-    $data = session('data'); // print settings
-    return view('pricing', compact('data'));
-})->name('pricing');
-
-Route::post('/print/summary', [PrintSummaryController::class, 'show'])->name('print.summary');
+// Admin Pricing
 
 
+Route::resource('admin/print-settings', PrintSettingController::class);
+Route::get('/admin/print-settings', [PrintSettingController::class, 'index'])->name('admin.print-settings.index');
 
 

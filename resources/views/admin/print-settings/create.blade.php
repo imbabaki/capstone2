@@ -1,4 +1,4 @@
-<form method="POST" action="{{ route('admin.print-settings.store') }}">
+<form method="POST" action="{{ route('print-settings.store') }}">
     @csrf
     <label>Paper Size:</label>
     <select name="paper_size" required>

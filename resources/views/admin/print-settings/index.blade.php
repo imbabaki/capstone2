@@ -19,7 +19,7 @@
         @forelse ($settings as $setting)
             <tr>
                 <td>{{ $setting->paper_size }}</td>
-                <td>{{ $setting->color }}</td>
+                <td>{{ $setting->color_option }}</td>
                 <td>{{ $setting->price }}</td>
                 <td>
                     <form action="{{ route('print-settings.destroy', $setting) }}" method="POST">

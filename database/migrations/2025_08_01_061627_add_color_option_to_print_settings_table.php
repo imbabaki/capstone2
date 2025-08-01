@@ -11,9 +11,9 @@ return new class extends Migration
      */
    public function up(): void
 {
-    Schema::table('print_settings', function (Blueprint $table) {
-        $table->string('color_option')->after('paper_size'); // adjust position if needed
-    });
+   // Schema::table('print_settings', function (Blueprint $table) {
+   //     $table->string('color_option')->after('paper_size'); // adjust position if needed
+   // });
 }
 
 public function down(): void

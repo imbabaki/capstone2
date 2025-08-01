@@ -109,9 +109,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\Users\\Daniel\\capstone2\\resources\\views',
+      0 => 'C:\\Users\\UserPC\\capstone2\\resources\\views',
     ),
-    'compiled' => 'C:\\Users\\Daniel\\capstone2\\storage\\framework\\views',
+    'compiled' => 'C:\\Users\\UserPC\\capstone2\\storage\\framework\\views',
   ),
   'app' => 
   array (
@@ -126,7 +126,7 @@
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'cipher' => 'AES-256-CBC',
-    'key' => 'base64:hWEKMiRCAc0zsJbnApWPLJRbXa2OYth/FXpjmonVIp8=',
+    'key' => 'base64:2ss/x/ANX0YSrplS+0cbPZeLFkpT6NuzOmryUH5YChE=',
     'previous_keys' => 
     array (
     ),
@@ -267,8 +267,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\Users\\Daniel\\capstone2\\storage\\framework/cache/data',
-        'lock_path' => 'C:\\Users\\Daniel\\capstone2\\storage\\framework/cache/data',
+        'path' => 'C:\\Users\\UserPC\\capstone2\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\Users\\UserPC\\capstone2\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -323,7 +323,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'laravel',
+        'database' => 'instaprint',
         'prefix' => '',
         'foreign_key_constraints' => true,
         'busy_timeout' => NULL,
@@ -336,7 +336,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'laravel',
+        'database' => 'instaprint',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -356,7 +356,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'laravel',
+        'database' => 'instaprint',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -376,7 +376,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'laravel',
+        'database' => 'instaprint',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -391,7 +391,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'laravel',
+        'database' => 'instaprint',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -441,7 +441,7 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\Daniel\\capstone2\\storage\\app/private',
+        'root' => 'C:\\Users\\UserPC\\capstone2\\storage\\app/private',
         'serve' => true,
         'throw' => false,
         'report' => false,
@@ -449,7 +449,7 @@
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\Daniel\\capstone2\\storage\\app/public',
+        'root' => 'C:\\Users\\UserPC\\capstone2\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -471,7 +471,7 @@
     ),
     'links' => 
     array (
-      'C:\\Users\\Daniel\\capstone2\\public\\storage' => 'C:\\Users\\Daniel\\capstone2\\storage\\app/public',
+      'C:\\Users\\UserPC\\capstone2\\public\\storage' => 'C:\\Users\\UserPC\\capstone2\\storage\\app/public',
     ),
   ),
   'logging' => 
@@ -496,14 +496,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\Users\\Daniel\\capstone2\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\UserPC\\capstone2\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\Users\\Daniel\\capstone2\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\UserPC\\capstone2\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -568,7 +568,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\Users\\Daniel\\capstone2\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\UserPC\\capstone2\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -646,7 +646,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\Users\\Daniel\\capstone2\\resources\\views/vendor/mail',
+        0 => 'C:\\Users\\UserPC\\capstone2\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -741,7 +741,7 @@
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\Users\\Daniel\\capstone2\\storage\\framework/sessions',
+    'files' => 'C:\\Users\\UserPC\\capstone2\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,

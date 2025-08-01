@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('print_settings', function (Blueprint $table) {
             $table->id();
             $table->enum('paper_size', ['A4', 'Short', 'Legal']);
-            $table->enum('color', ['color', 'grayscale']);
+            $table->enum('color_option', ['color', 'grayscale']); // <-- FIXED name
             $table->decimal('price', 8, 2);
             $table->timestamps();
-            
-            $table->unique(['paper_size', 'color']); // Ensure one setting per combination
+
+            $table->unique(['paper_size', 'color_option']); // <-- Updated to match
         });
     }
 

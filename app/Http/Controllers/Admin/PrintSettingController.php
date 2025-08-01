@@ -28,19 +28,30 @@ class PrintSettingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'paper_size' => 'required|string',
-            'color_option' => 'required|string',
-            'price' => 'required|numeric',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'paper_size' => 'required|string',
+        'color_option' => 'required|string',
+        'price' => 'required|numeric',
+    ]);
 
-        PrintSetting::create($request->all());
+    $exists = PrintSetting::where('paper_size', $request->paper_size)
+        ->where('color_option', $request->color_option)
+        ->exists();
 
-        return redirect()->route('admin.print-settings.index')->with('success', 'Print setting added successfully.');
+    if ($exists) {
+        return redirect()->back()->with('error', 'This print setting already exists.');
     }
 
+    PrintSetting::create([
+        'paper_size' => $request->paper_size,
+        'color_option' => $request->color_option,
+        'price' => $request->price,
+    ]);
+
+    return redirect()->route('admin.print-settings.index')->with('success', 'Print setting added!');
+}
     /**
      * Display the specified resource.
      */

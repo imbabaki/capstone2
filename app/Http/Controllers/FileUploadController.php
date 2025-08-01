@@ -18,8 +18,25 @@ class FileUploadController extends Controller
             'file' => 'required|file|max:10240', // max 10MB
         ]);
 
-        $path = $request->file('file')->store('uploads');
+        // ✅ Store in 'public' disk so it’s accessible via browser
+        $path = $request->file('file')->store('uploads', 'public');
 
-        return back()->with('success', 'File uploaded successfully: ' . $path);
+        // ✅ Redirect to edit with filename
+        return redirect()->route('upload.edit', ['filename' => basename($path)]);
+    }
+
+    public function edit($filename)
+    {
+        // ✅ Generate public URL for file preview
+        $fileUrl = asset('storage/uploads/' . $filename);
+
+        return view('edit_upload', compact('fileUrl', 'filename'));
+    }
+
+    // (Optional) Save options after edit
+    public function saveOptions(Request $request)
+    {
+        // Handle print options here (e.g., save to session or DB)
+        return back()->with('success', 'Options saved!');
     }
 }

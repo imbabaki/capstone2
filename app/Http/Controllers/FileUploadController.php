@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\PrintSetting;
 
 class FileUploadController extends Controller
 {
@@ -24,14 +25,13 @@ class FileUploadController extends Controller
         // ✅ Redirect to edit with filename
         return redirect()->route('upload.edit', ['filename' => basename($path)]);
     }
+public function edit($filename)
+{
+    $fileUrl = asset('storage/uploads/' . $filename);
+    $pricing = PrintSetting::all();
 
-    public function edit($filename)
-    {
-        // ✅ Generate public URL for file preview
-        $fileUrl = asset('storage/uploads/' . $filename);
-
-        return view('edit_upload', compact('fileUrl', 'filename'));
-    }
+    return view('edit_upload', compact('fileUrl', 'filename', 'pricing'));
+}
 
     // (Optional) Save options after edit
     public function saveOptions(Request $request)

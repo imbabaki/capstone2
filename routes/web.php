@@ -31,6 +31,7 @@ Route::post('/upload', [FileUploadController::class, 'store'])->name('upload.sto
 Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
 Route::post('/upload/options/save', [FileUploadController::class, 'saveOptions'])->name('upload.options.save');
 
+
 // Bluetooth functionality
 Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth');
 

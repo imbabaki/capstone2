@@ -11,6 +11,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\Admin\PrintSettingController;
 
 
+
 // Start screen
 Route::get('/start', function () {
     return view('start');
@@ -20,6 +21,8 @@ Route::get('/start', function () {
 Route::get('/options', function () {
     return view('options');
 })->name('options');
+
+
 
 Route::get('/qr-code', [QrCodeController::class, 'show'])->name('qr.code');
 Route::get('/upload', function () {
@@ -41,6 +44,32 @@ Route::post('/USBFD/download', [USBController::class, 'download'])->name('USBFD.
 Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD_preview');
 Route::post('/USBFD/print', [USBController::class, 'print'])->name('USBFD.print');
 Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('USBFD.preview');
+Route::post('/USBFD/payment', [USBController::class, 'paymentPage'])->name('USBFD.payment');
+Route::post('/USBFD/process-payment', [USBController::class, 'processPayment'])->name('USBFD.processPayment');
+
+Route::get('/USBFD/payment', [USBController::class, 'paymentPage'])->name('USBFD.payment');
+Route::post('/USBFD/payment', [USBController::class, 'handlePayment'])->name('USBFD.payment.submit');
+
+Route::post('/usb/payment/process', [USBController::class, 'handlePayment'])->name('usb.payment.process');
+
+// USB Flash Drive instructions and finalize
+Route::get('/usb/instructions', function () {
+    return view('USBFD.instructions');
+})->name('usb.instructions');   
+
+
+
+Route::get('/usb/finalize', [USBController::class, 'finalize'])->name('finalize');
+Route::post('/usb/print', [USBController::class, 'doFinalPrint'])->name('print.finalize');
+
+
+Route::get('/usb/success', function () {
+    return 'Print job has been sent!';
+})->name('usb.success');
+
+
+
+
 
 // Admin Pricing
 

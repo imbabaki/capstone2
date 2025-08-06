@@ -4,7 +4,7 @@
     <select name="paper_size" required>
         <option value="">-- Select --</option>
         <option value="A4">A4</option>
-        <option value="Short">Short</option>
+        <option value="Letter">Letter</option>
         <option value="Legal">Legal</option>
     </select>
 

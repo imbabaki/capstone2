@@ -35,11 +35,11 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="color" class="form-label">Color Option</label>
-                    <select name="color" id="color" class="form-select">
-                        <option value="color">Color</option>
-                        <option value="grayscale">Grayscale</option>
-                    </select>
+                   <select name="color_option" id="color_option" class="form-select">
+    <option value="color">Color</option>
+    <option value="grayscale">Grayscale</option>
+</select>
+
                 </div>
 
                 <button type="submit" class="btn btn-success w-100">Print File</button>
@@ -47,3 +47,42 @@
         </div>
     </div>
 </div>
+<div class="mb-3">
+    <label class="form-label fw-bold">Total Amount</label>
+    <input type="text" id="totalAmount" class="form-control bg-light" readonly>
+</div>
+
+<script>
+    // Sample price list fetched from the backend (you’ll replace this with actual DB data)
+    const prices = @json($pricing); // You’ll pass $pricing from controller
+
+    const paperSize = document.getElementById('paper_size');
+    const color = document.getElementById('color_option');
+    const copies = document.getElementById('copies');
+    const pages = document.getElementById('pages');
+    const totalAmountField = document.getElementById('totalAmount');
+
+    function calculateTotal() {
+        const size = paperSize.value;
+        const col = color.value;
+        const numCopies = parseInt(copies.value) || 1;
+        const numPages = parseInt(pages.value) || 1;
+
+        // Match the price from pricing settings
+        const match = prices.find(p => p.paper_size === size && p.color_option === col);
+
+        if (match) {
+            const total = match.price * numCopies * numPages;
+            totalAmountField.value = '₱' + total.toFixed(2);
+        } else {
+            totalAmountField.value = 'N/A';
+        }
+    }
+
+    [paperSize, color, copies, pages].forEach(el => {
+        el.addEventListener('change', calculateTotal);
+        el.addEventListener('input', calculateTotal);
+    });
+
+    window.onload = calculateTotal;
+</script>

@@ -10,6 +10,5 @@ use Illuminate\Database\Eloquent\Model;
 class PrintSetting extends Model
 {
     use HasFactory;
-
     protected $fillable = ['paper_size', 'color_option', 'price'];
 }

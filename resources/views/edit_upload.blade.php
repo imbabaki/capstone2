@@ -9,19 +9,6 @@
             background: #f5f5f5;
         }
 
-        h1, h2 {
-            margin-bottom: 20px;
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        li {
-            margin-bottom: 10px;
-        }
-
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -38,10 +25,9 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .preview iframe,
-        .preview img {
+        .preview iframe, .preview img {
             width: 100%;
-            height: 600px;
+            height: 700px;
             border: none;
             object-fit: contain;
         }
@@ -62,7 +48,7 @@
         button {
             margin-top: 20px;
             padding: 10px;
-            width: 20%;
+            width: 100%;
             background-color: #28a745;
             border: none;
             color: white;
@@ -74,28 +60,13 @@
             background-color: #218838;
         }
 
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 6px;
-            font-size: 14px;
-            margin-left: 10px;
-            cursor: pointer;
-        }
-
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
             }
 
-            .preview iframe,
-            .preview img {
+            .preview iframe, .preview img {
                 height: 400px;
-            }
-
-            button {
-                width: 100%;
             }
         }
     </style>
@@ -117,28 +88,67 @@
                 @csrf
                 <input type="hidden" name="filename" value="{{ $filename }}">
 
-                <label>Paper Size</label>
-                <select name="paper_size">
+                <label for="paper_size">Paper Size</label>
+                <select name="paper_size" id="paper_size">
                     <option>A4</option>
                     <option>Letter</option>
                     <option>Legal</option>
                 </select>
 
-                <label>Copies</label>
-                <input type="number" name="copies" value="1" min="1">
+                <label for="copies">Copies</label>
+                <input type="number" name="copies" id="copies" value="1" min="1">
 
-                <label>Page Range</label>
-                <input type="number" name="page_range" value="1" min="1">
+                <label for="page_range">Page Range</label>
+                <input type="number" name="page_range" id="pages" value="1" min="1">
 
-                <label>Color Mode</label>
-                <select name="color_mode">
+                <label for="color_option">Color Mode</label>
+                <select name="color_option" id="color_option">
                     <option value="color">Color</option>
-                    <option value="bw">Black & White</option>
+                    <option value="grayscale">Black & White</option>
                 </select>
+
+                <label>Total Price</label>
+                <input type="text" id="totalAmount" class="form-control" readonly style="background: #eee; font-weight: bold;">
+                <input type="hidden" name="calculated_total" id="calculated_total">
 
                 <button type="submit">Save Print Settings</button>
             </form>
         </div>
     </div>
+
+    <script>
+        const prices = @json($pricing);
+        const paperSize = document.getElementById('paper_size');
+        const color = document.getElementById('color_option');
+        const copies = document.getElementById('copies');
+        const pages = document.getElementById('pages');
+        const totalAmount = document.getElementById('totalAmount');
+        const hiddenTotal = document.getElementById('calculated_total');
+
+        function calculateTotal() {
+            const size = paperSize.value;
+            const col = color.value;
+            const numCopies = parseInt(copies.value) || 1;
+            const numPages = parseInt(pages.value) || 1;
+
+            const match = prices.find(p => p.paper_size === size && p.color_option === col);
+
+            if (match) {
+                const total = match.price * numCopies * numPages;
+                totalAmount.value = '₱' + total.toFixed(2);
+                hiddenTotal.value = total.toFixed(2);
+            } else {
+                totalAmount.value = 'N/A';
+                hiddenTotal.value = '';
+            }
+        }
+
+        [paperSize, color, copies, pages].forEach(el => {
+            el.addEventListener('input', calculateTotal);
+            el.addEventListener('change', calculateTotal);
+        });
+
+        window.onload = calculateTotal;
+    </script>
 </body>
 </html>

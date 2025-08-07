@@ -25,13 +25,13 @@ class FileUploadController extends Controller
         // ✅ Redirect to edit with filename
         return redirect()->route('upload.edit', ['filename' => basename($path)]);
     }
-public function edit($filename)
-{
+    public function edit($filename)
+    {
     $fileUrl = asset('storage/uploads/' . $filename);
     $pricing = PrintSetting::all();
 
     return view('edit_upload', compact('fileUrl', 'filename', 'pricing'));
-}
+    }
 
     // (Optional) Save options after edit
     public function saveOptions(Request $request)
@@ -39,4 +39,19 @@ public function edit($filename)
         // Handle print options here (e.g., save to session or DB)
         return back()->with('success', 'Options saved!');
     }
+
+    public function processPayment(Request $request)
+    {
+        $params = [
+            'calculated_total' => $request->input('calculated_total'),
+            'file' => $request->input('file'),
+            'copies' => $request->input('copies'),
+            'pages' => $request->input('pages'),
+            'color' => $request->input('color'),
+            'total' => $request->input('total'),
+        ];
+
+        return redirect()->route('USBFD.payment', $params);
+    }
+
 }

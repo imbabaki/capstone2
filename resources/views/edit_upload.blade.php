@@ -84,7 +84,7 @@
         </div>
 
         <div class="options">
-            <form action="{{ route('upload.options.save') }}" method="POST">
+            <form action="{{ route('USBFD.processPayment') }}" method="POST">
                 @csrf
                 <input type="hidden" name="filename" value="{{ $filename }}">
 
@@ -111,7 +111,7 @@
                 <input type="text" id="totalAmount" class="form-control" readonly style="background: #eee; font-weight: bold;">
                 <input type="hidden" name="calculated_total" id="calculated_total">
 
-                <button type="submit">Save Print Settings</button>
+                <button type="submit">Proceed</button>
             </form>
         </div>
     </div>

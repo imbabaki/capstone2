@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (timeLeft <= 0) {
             clearInterval(timer);
             alert("Time expired. Returning to selection page.");
-            window.location.href = "{{ route('USBFD') }}";
+            window.location.href = "{{ route('start') }}";
         }
     }, 1000);
 });

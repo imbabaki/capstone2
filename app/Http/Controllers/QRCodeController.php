@@ -9,7 +9,7 @@ class QRCodeController extends Controller
 {
     public function show()
     {
-        $uploadUrl = 'http://192.168.1.87:8000/upload'; //change to actual to your ip address
+        $uploadUrl = 'http://192.168.1.26:8000/upload'; //change to actual to your ip address
         
         $qr = QrCode::size(300)->generate($uploadUrl);
         return view('qr_code', [

@@ -13,9 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-
-            '_route' => 'generated::zcOAJAfyU72YuMyL',
-
+            '_route' => 'generated::qC3krdQTvOrLzYcM',
           ),
           1 => NULL,
           2 => 
@@ -125,13 +123,102 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/upload/options/save' => 
+      '/upload/payment' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'upload.options.save',
+            '_route' => 'upload.payment',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.payment.post',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/upload/instructions' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.instructions',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.instructions.call',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/upload/execute-print' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.executePrint',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.executePrints',
           ),
           1 => NULL,
           2 => 
@@ -164,13 +251,32 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/USBFD' => 
+      '/bluetooth/enable' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'USBFD',
+            '_route' => 'bluetooth.enable',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/bluetooth/list' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'bluetooth.list',
           ),
           1 => NULL,
           2 => 
@@ -184,18 +290,19 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/USBFD/download' => 
+      '/USBFD' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'USBFD.download',
+            '_route' => 'usbfd.index',
           ),
           1 => NULL,
           2 => 
           array (
-            'POST' => 0,
+            'GET' => 0,
+            'HEAD' => 1,
           ),
           3 => NULL,
           4 => false,
@@ -209,7 +316,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'USBFD.preview',
+            '_route' => 'usbfd.preview',
           ),
           1 => NULL,
           2 => 
@@ -223,13 +330,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/USBFD/print' => 
+      '/USBFD/review' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'USBFD.print',
+            '_route' => 'usbfd.review',
           ),
           1 => NULL,
           2 => 
@@ -242,49 +349,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/USBFD/payment' => 
+      '/usbfd/process' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'USBFD.payment.submit',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'USBFD.payment',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/USBFD/process-payment' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'USBFD.processPayment',
+            '_route' => 'usbfd.process',
           ),
           1 => NULL,
           2 => 
@@ -297,13 +368,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usb/payment/process' => 
+      '/usbfd/payment' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'usb.payment.process',
+            '_route' => 'usbfd.payment.handle',
           ),
           1 => NULL,
           2 => 
@@ -316,33 +387,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usb/instructions' => 
+      '/usbfd/instruction' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'usb.instructions',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/usb/finalize' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'finalize',
+            '_route' => 'usbfd.instruction',
           ),
           1 => NULL,
           2 => 
@@ -362,7 +413,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'print.finalize',
+            '_route' => 'usb.print',
           ),
           1 => NULL,
           2 => 
@@ -375,7 +426,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usb/success' => 
+      '/USBFD/success' => 
       array (
         0 => 
         array (
@@ -388,6 +439,25 @@ app('router')->setCompiledRoutes(
           array (
             'GET' => 0,
             'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/usbfd/process-payment' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'USBFD.processPayment',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
           ),
           3 => NULL,
           4 => false,
@@ -451,14 +521,34 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/usb-check' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'generated::LbzJuZt4I2nyAc9P',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
     ),
     2 => 
     array (
-      0 => '{^(?|/upload/edit/([^/]++)(*:28)|/admin/print\\-settings/([^/]++)(?|(*:69)|/edit(*:81)|(*:88))|/storage/(.*)(*:109))/?$}sDu',
+      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/admin/print\\-settings/([^/]++)(?|(*:97)|/edit(*:109)|(*:117))|/storage/(.*)(*:139))/?$}sDu',
     ),
     3 => 
     array (
-      28 => 
+      31 => 
       array (
         0 => 
         array (
@@ -481,7 +571,30 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      69 => 
+      55 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'USBFD.preview',
+          ),
+          1 => 
+          array (
+            0 => 'filepath',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      97 => 
       array (
         0 => 
         array (
@@ -504,7 +617,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      81 => 
+      109 => 
       array (
         0 => 
         array (
@@ -527,7 +640,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      88 => 
+      117 => 
       array (
         0 => 
         array (
@@ -569,7 +682,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      109 => 
+      139 => 
       array (
         0 => 
         array (
@@ -607,9 +720,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-
-    'generated::zcOAJAfyU72YuMyL' => 
-
+    'generated::qC3krdQTvOrLzYcM' => 
     array (
       'methods' => 
       array (
@@ -619,7 +730,7 @@ app('router')->setCompiledRoutes(
       'uri' => 'up',
       'action' => 
       array (
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:847:"function () {
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:815:"function () {
                     $exception = null;
 
                     try {
@@ -634,13 +745,11 @@ app('router')->setCompiledRoutes(
                         $exception = $e->getMessage();
                     }
 
-                    return response(\\Illuminate\\Support\\Facades\\View::file(\'C:\\\\Users\\\\UserPC\\\\capstone2\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Configuration\'.\'/../resources/health-up.blade.php\', [
+                    return response(\\Illuminate\\Support\\Facades\\View::file(\'/var/www/html/laravel/vendor/laravel/framework/src/Illuminate/Foundation/Configuration\'.\'/../resources/health-up.blade.php\', [
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
-                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004c80000000000000000";}}',
-
-        'as' => 'generated::zcOAJAfyU72YuMyL',
-
+                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004c90000000000000000";}}',
+        'as' => 'generated::qC3krdQTvOrLzYcM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -672,7 +781,7 @@ app('router')->setCompiledRoutes(
         ),
         'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:42:"function () {
     return \\view(\'start\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ce0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004cf0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -708,9 +817,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
         ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:44:"function () {
-    return \\view(\'options\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004d00000000000000000";}}',
+        'uses' => 'App\\Http\\Controllers\\OptionsController@index',
+        'controller' => 'App\\Http\\Controllers\\OptionsController@index',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -879,13 +987,50 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'upload.options.save' => 
+    'upload.payment' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/payment',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@showPayment',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@showPayment',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.payment',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.payment.post' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'upload/options/save',
+      'uri' => 'upload/payment',
       'action' => 
       array (
         'middleware' => 
@@ -899,7 +1044,153 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'upload.options.save',
+        'as' => 'upload.payment.post',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.instructions' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/instructions',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@instruction',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@instruction',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.instructions',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.instructions.call' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'upload/instructions',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@instruction',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@instruction',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.instructions.call',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.executePrint' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/execute-print',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.executePrint',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.executePrints' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'upload/execute-print',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.executePrints',
       ),
       'fallback' => false,
       'defaults' => 
@@ -952,7 +1243,80 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD' => 
+    'bluetooth.enable' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'bluetooth/enable',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\BluetoothController@enableBluetooth',
+        'controller' => 'App\\Http\\Controllers\\BluetoothController@enableBluetooth',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'bluetooth.enable',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'bluetooth.list' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'bluetooth/list',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\BluetoothController@listPDFs',
+        'controller' => 'App\\Http\\Controllers\\BluetoothController@listPDFs',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'bluetooth.list',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usbfd.index' => 
     array (
       'methods' => 
       array (
@@ -973,7 +1337,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'USBFD',
+        'as' => 'usbfd.index',
       ),
       'fallback' => false,
       'defaults' => 
@@ -989,43 +1353,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD.download' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'USBFD/download',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@download',
-        'controller' => 'App\\Http\\Controllers\\USBController@download',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'USBFD.download',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'USBFD.preview' => 
+    'usbfd.preview' => 
     array (
       'methods' => 
       array (
@@ -1046,7 +1374,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'USBFD.preview',
+        'as' => 'usbfd.preview',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1062,27 +1390,27 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD.print' => 
+    'usbfd.review' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'USBFD/print',
+      'uri' => 'USBFD/review',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'web',
         ),
-        'uses' => 'App\\Http\\Controllers\\USBController@print',
-        'controller' => 'App\\Http\\Controllers\\USBController@print',
+        'uses' => 'App\\Http\\Controllers\\USBController@review',
+        'controller' => 'App\\Http\\Controllers\\USBController@review',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'USBFD.print',
+        'as' => 'usbfd.review',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1098,13 +1426,49 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD.payment.submit' => 
+    'usbfd.process' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'USBFD/payment',
+      'uri' => 'usbfd/process',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@processPayment',
+        'controller' => 'App\\Http\\Controllers\\USBController@processPayment',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usbfd.process',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usbfd.payment.handle' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'usbfd/payment',
       'action' => 
       array (
         'middleware' => 
@@ -1118,7 +1482,117 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'USBFD.payment.submit',
+        'as' => 'usbfd.payment.handle',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usbfd.instruction' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'usbfd/instruction',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@instruction',
+        'controller' => 'App\\Http\\Controllers\\USBController@instruction',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usbfd.instruction',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usb.print' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'usb/print',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@doFinalPrint',
+        'controller' => 'App\\Http\\Controllers\\USBController@doFinalPrint',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usb.print',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usb.success' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'USBFD/success',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@success',
+        'controller' => 'App\\Http\\Controllers\\USBController@success',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usb.success',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1140,7 +1614,7 @@ app('router')->setCompiledRoutes(
       array (
         0 => 'POST',
       ),
-      'uri' => 'USBFD/process-payment',
+      'uri' => 'usbfd/process-payment',
       'action' => 
       array (
         'middleware' => 
@@ -1170,28 +1644,28 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD.payment' => 
+    'USBFD.preview' => 
     array (
       'methods' => 
       array (
         0 => 'GET',
         1 => 'HEAD',
       ),
-      'uri' => 'USBFD/payment',
+      'uri' => 'usbfd/preview/{filepath}',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'web',
         ),
-        'uses' => 'App\\Http\\Controllers\\USBController@paymentPage',
-        'controller' => 'App\\Http\\Controllers\\USBController@paymentPage',
+        'uses' => 'App\\Http\\Controllers\\USBController@preview',
+        'controller' => 'App\\Http\\Controllers\\USBController@preview',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'USBFD.payment',
+        'as' => 'USBFD.preview',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1199,191 +1673,7 @@ app('router')->setCompiledRoutes(
       ),
       'wheres' => 
       array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'usb.payment.process' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'usb/payment/process',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@handlePayment',
-        'controller' => 'App\\Http\\Controllers\\USBController@handlePayment',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'usb.payment.process',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'usb.instructions' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'usb/instructions',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:55:"function () {
-    return \\view(\'USBFD.instructions\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e00000000000000000";}}',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'usb.instructions',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'finalize' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'usb/finalize',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@finalize',
-        'controller' => 'App\\Http\\Controllers\\USBController@finalize',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'finalize',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'print.finalize' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'usb/print',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@doFinalPrint',
-        'controller' => 'App\\Http\\Controllers\\USBController@doFinalPrint',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'print.finalize',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'usb.success' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'usb/success',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:54:"function () {
-    return \'Print job has been sent!\';
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e40000000000000000";}}',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'usb.success',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
+        'filepath' => '.*',
       ),
       'bindingFields' => 
       array (
@@ -1649,6 +1939,60 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'generated::LbzJuZt4I2nyAc9P' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'usb-check',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:693:"function () {
+    $user = \\trim(\\shell_exec(\'whoami\'));
+    $possiblePaths = ["/media/$user", "/media/usb", "/mnt/usb"];
+
+    $mountedUSBs = \\collect($possiblePaths)
+        ->filter(fn($path) => \\Illuminate\\Support\\Facades\\File::exists($path))
+        ->flatMap(fn($path) => \\Illuminate\\Support\\Facades\\File::directories($path))
+        ->values();
+
+    if ($mountedUSBs->isEmpty()) {
+        return \\response()->json([\'count\' => 0]);
+    }
+
+    $usbPath = $mountedUSBs->first();
+    $files = \\collect(\\Illuminate\\Support\\Facades\\File::files($usbPath))
+        ->filter(fn($file) => \\strtolower($file->getExtension()) === \'pdf\');
+
+    return \\response()->json([\'count\' => $files->count()]);
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e90000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'generated::LbzJuZt4I2nyAc9P',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'storage.local' => 
     array (
       'methods' => 
@@ -1659,13 +2003,13 @@ app('router')->setCompiledRoutes(
       'uri' => 'storage/{path}',
       'action' => 
       array (
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:3:{s:4:"disk";s:5:"local";s:6:"config";a:5:{s:6:"driver";s:5:"local";s:4:"root";s:45:"C:\\Users\\UserPC\\capstone2\\storage\\app/private";s:5:"serve";b:1;s:5:"throw";b:0;s:6:"report";b:0;}s:12:"isProduction";b:0;}s:8:"function";s:329:"function (\\Illuminate\\Http\\Request $request, string $path) use ($disk, $config, $isProduction) {
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:3:{s:4:"disk";s:5:"local";s:6:"config";a:5:{s:6:"driver";s:5:"local";s:4:"root";s:41:"/var/www/html/laravel/storage/app/private";s:5:"serve";b:1;s:5:"throw";b:0;s:6:"report";b:0;}s:12:"isProduction";b:0;}s:8:"function";s:323:"function (\\Illuminate\\Http\\Request $request, string $path) use ($disk, $config, $isProduction) {
                     return (new \\Illuminate\\Filesystem\\ServeFile(
                         $disk,
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004e60000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004ec0000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

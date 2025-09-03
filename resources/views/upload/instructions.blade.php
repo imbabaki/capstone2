@@ -33,7 +33,7 @@
         <li>Duplex: {{ $order['duplex'] }}</li>
     </ul>
 
-    <form method="POST" action="{{ route('upload.executePrints') }}">
+    <form method="POST" action="{{ route('upload.print') }}">
     @csrf
     <button type="submit">Start Printing</button>
 </form>

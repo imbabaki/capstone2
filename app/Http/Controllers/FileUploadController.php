@@ -35,7 +35,7 @@ class FileUploadController extends Controller
             'file_name'  => $filename,
             'file_path'  => public_path('uploads/' . $filename),
             'copies'     => 1,
-            'pages'      => '', // default all pages
+            'pages'      => 1, // default all pages
             'color'      => 'color',
             'paper_size' => 'A4',
             'duplex'     => 'one-sided',
@@ -57,7 +57,7 @@ class FileUploadController extends Controller
         return view('edit_upload', compact('fileUrl', 'filename', 'pricing', 'order'));
     }
 
-    public function doFinalPrint(Request $request)
+   public function doFinalPrint(Request $request)
     {
     $order = session('usb.order');
 
@@ -66,24 +66,20 @@ class FileUploadController extends Controller
     }
 
     $filePath = public_path('uploads/' . $order['file_name']);
+
     if (!File::exists($filePath)) {
-        return back()->with('error', 'File not found.');
+        Log::error('Print failed: File not found', ['path' => $filePath]);
+        return back()->with('error', 'File not found: ' . $filePath);
     }
 
-    // ✅ get default printer if not provided
-    $printer = $order['printer'] ?? trim(shell_exec("lpstat -d 2>/dev/null"));
-    if (!$printer) {
-        return back()->with('error', 'No printer configured.');
-    }
-
+    $printer = $order['printer'] ?? 'EPSON_L120_Series';
     $copies  = (int)($order['copies'] ?? 1);
-    $pages   = $order['pages'] ?? '';
+    $pages   = $order['pages'] ?? 1;
     $color   = $order['color'] ?? 'color';
     $paper   = $order['paper_size'] ?? null;
     $duplex  = $order['duplex'] ?? 'one-sided';
     $fit     = $order['fit'] ?? 'none';
 
-    // ✅ build lp command
     $cmd = ['lp', '-d', $printer, '-n', (string) max(1, $copies)];
 
     if (!empty($pages)) {
@@ -111,22 +107,35 @@ class FileUploadController extends Controller
 
     $cmd[] = $filePath;
 
-    // ✅ escape and execute
     $escaped = array_map('escapeshellarg', $cmd);
     $final   = implode(' ', $escaped) . ' 2>&1';
+
+    Log::info('CUPS print command', ['cmd' => $final]);
+
     $output  = shell_exec($final);
 
-    Log::info('CUPS print command (upload)', ['cmd' => $final, 'output' => $output]);
+    Log::info('CUPS output', ['output' => $output]);
 
-    // optional: clear session after print
-    session()->forget('usb.order');
+    // ❌ don’t clear here
+    // session()->forget('usb.order');
 
-    return back()->with('success', 'Print job sent to CUPS: ' . $output);
+    return redirect()->route('USBFD.success')->with('success', 'Print job sent: ' . $output);
     }
 
 
 
-   public function instruction()
+
+    public function paymentPage()
+    {
+    $order = session('usb.order');
+    if (!$order) {
+        return redirect()->route('upload.form')->with('error', 'No order found.');
+    }
+
+    return view('upload.payment', compact('order'));
+    }
+
+    public function instruction()
     {
     $order = session('usb.order');
     if (!$order) {
@@ -135,5 +144,4 @@ class FileUploadController extends Controller
 
     return view('upload.instructions', compact('order'));
     }
-
 }

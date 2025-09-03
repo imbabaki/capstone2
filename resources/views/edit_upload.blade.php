@@ -27,7 +27,7 @@
     </div>
 
     <div class="options">
-        <form action="{{ route('upload.payment') }}" method="POST">
+        <form action="{{ route('upload.payment') }}" method="GET">
             @csrf
             <input type="hidden" name="file_name" value="{{ $filename }}">
 
@@ -35,7 +35,7 @@
             <input type="number" id="copies" name="copies" value="{{ $order['copies'] ?? 1 }}" min="1">
 
             <label for="pages">Pages (e.g., 1-3,5)</label>
-            <input type="text" id="pages" name="pages" value="{{ $order['pages'] ?? '' }}">
+            <input type="text" id="pages" name="pages" value="{{ $order['pages'] ?? 1}}">
 
             <label for="color_option">Color</label>
             <select id="color_option" name="color_option">

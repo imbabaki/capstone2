@@ -30,15 +30,25 @@ Route::get('/options', [OptionsController::class, 'index'])->name('options');
 Route::get('/qr-code', [QRCodeController::class, 'show'])->name('qr.code');
 
 // Upload routes
-Route::get('/upload', [FileUploadController::class, 'showForm'])->name('upload.form');
-Route::post('/upload', [FileUploadController::class, 'store'])->name('upload.store');
+
+Route::get('/upload', function () {
+    return redirect()->route('upload.form');
+});
+
+Route::get('/upload/form', [FileUploadController::class, 'showForm'])->name('upload.form');
+Route::post('/upload/form', [FileUploadController::class, 'store'])->name('upload.store');
+
+// Edit settings
 Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
-Route::get('/upload/payment', [FileUploadController::class, 'showPayment'])->name('upload.payment');
-Route::post('/upload/payment', [FileUploadController::class, 'saveOptions'])->name('upload.payment.post');
+
+// Payment summary (GET only)
+Route::get('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
+
+// Instructions page (GET only)
 Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
-Route::post('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions.call');
-Route::get('/upload/execute-print', [FileUploadController::class, 'doFinalPrint'])->name('upload.executePrint');
-Route::post('/upload/execute-print', [FileUploadController::class, 'doFinalPrint'])->name('upload.executePrints');
+
+// Print (POST only)
+Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
 
 // Bluetooth functionality
 Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth');

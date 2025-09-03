@@ -9,7 +9,7 @@ h2>Review & Pay</h2>
   <li>Total: ₱{{ number_format($order['total'], 2) }}</li>
 </ul>
 
-<form method="POST" action="{{ route('upload.instructions.call') }}">
+<form method= "GET" action="{{ route('upload.instructions') }}">
   @csrf
   <button type="submit">✅ I have paid</button>
 </form>

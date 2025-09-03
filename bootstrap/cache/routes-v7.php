@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::qC3krdQTvOrLzYcM',
+            '_route' => 'generated::lnlDsVQBuK3yqs3n',
           ),
           1 => NULL,
           2 => 
@@ -93,6 +93,26 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
+            '_route' => 'generated::CdkqwAv6JDMMe8Dj',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/upload/form' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
             '_route' => 'upload.form',
           ),
           1 => NULL,
@@ -142,22 +162,6 @@ app('router')->setCompiledRoutes(
           5 => false,
           6 => NULL,
         ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'upload.payment.post',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
       ),
       '/upload/instructions' => 
       array (
@@ -178,47 +182,14 @@ app('router')->setCompiledRoutes(
           5 => false,
           6 => NULL,
         ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'upload.instructions.call',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
       ),
-      '/upload/execute-print' => 
+      '/upload/print' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'upload.executePrint',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'upload.executePrints',
+            '_route' => 'upload.print',
           ),
           1 => NULL,
           2 => 
@@ -527,7 +498,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::LbzJuZt4I2nyAc9P',
+            '_route' => 'generated::oVGwX9zQ3rjnbBbT',
           ),
           1 => NULL,
           2 => 
@@ -720,7 +691,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::qC3krdQTvOrLzYcM' => 
+    'generated::lnlDsVQBuK3yqs3n' => 
     array (
       'methods' => 
       array (
@@ -749,7 +720,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004c90000000000000000";}}',
-        'as' => 'generated::qC3krdQTvOrLzYcM',
+        'as' => 'generated::lnlDsVQBuK3yqs3n',
       ),
       'fallback' => false,
       'defaults' => 
@@ -877,7 +848,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'upload.form' => 
+    'generated::CdkqwAv6JDMMe8Dj' => 
     array (
       'methods' => 
       array (
@@ -885,6 +856,44 @@ app('router')->setCompiledRoutes(
         1 => 'HEAD',
       ),
       'uri' => 'upload',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:61:"function () {
+    return \\redirect()->route(\'upload.form\');
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004d30000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'generated::CdkqwAv6JDMMe8Dj',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.form' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/form',
       'action' => 
       array (
         'middleware' => 
@@ -920,7 +929,7 @@ app('router')->setCompiledRoutes(
       array (
         0 => 'POST',
       ),
-      'uri' => 'upload',
+      'uri' => 'upload/form',
       'action' => 
       array (
         'middleware' => 
@@ -1001,50 +1010,14 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
         ),
-        'uses' => 'App\\Http\\Controllers\\FileUploadController@showPayment',
-        'controller' => 'App\\Http\\Controllers\\FileUploadController@showPayment',
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@paymentPage',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@paymentPage',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
         'as' => 'upload.payment',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'upload.payment.post' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'upload/payment',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\FileUploadController@saveOptions',
-        'controller' => 'App\\Http\\Controllers\\FileUploadController@saveOptions',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'upload.payment.post',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1097,50 +1070,13 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'upload.instructions.call' => 
+    'upload.print' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'upload/instructions',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\FileUploadController@instruction',
-        'controller' => 'App\\Http\\Controllers\\FileUploadController@instruction',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'upload.instructions.call',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'upload.executePrint' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'upload/execute-print',
+      'uri' => 'upload/print',
       'action' => 
       array (
         'middleware' => 
@@ -1154,43 +1090,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'upload.executePrint',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'upload.executePrints' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'upload/execute-print',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
-        'controller' => 'App\\Http\\Controllers\\FileUploadController@doFinalPrint',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'upload.executePrints',
+        'as' => 'upload.print',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1939,7 +1839,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::LbzJuZt4I2nyAc9P' => 
+    'generated::oVGwX9zQ3rjnbBbT' => 
     array (
       'methods' => 
       array (
@@ -1971,13 +1871,13 @@ app('router')->setCompiledRoutes(
         ->filter(fn($file) => \\strtolower($file->getExtension()) === \'pdf\');
 
     return \\response()->json([\'count\' => $files->count()]);
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e90000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e80000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::LbzJuZt4I2nyAc9P',
+        'as' => 'generated::oVGwX9zQ3rjnbBbT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2009,7 +1909,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004ec0000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004eb0000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

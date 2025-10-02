@@ -27,7 +27,7 @@
     </div>
 
     <div class="options">
-        <form action="{{ route('upload.payment') }}" method="GET">
+        <form action="{{ route('upload.payment') }}" method="POST">
             @csrf
             <input type="hidden" name="file_name" value="{{ $filename }}">
 

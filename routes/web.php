@@ -11,6 +11,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\Admin\PrintSettingController;
 use App\Http\Controllers\OptionsController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Http;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +19,9 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 |--------------------------------------------------------------------------
 */
 
+
 // Start screen
-Route::get('/start', function () {
+Route::get('/', function () {
     return view('start');
 })->name('start');
 
@@ -42,7 +44,7 @@ Route::post('/upload/form', [FileUploadController::class, 'store'])->name('uploa
 Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
 
 // Payment summary (GET only)
-Route::get('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
+Route::post('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
 
 // Instructions page (GET only)
 Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
@@ -50,10 +52,19 @@ Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])
 // Print (POST only)
 Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
 
+// ✅ Check if a file has been uploaded (for kiosk auto-redirect)
+Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
+
+
+
+
 // Bluetooth functionality
-Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth');
-Route::post('/bluetooth/enable', [BluetoothController::class, 'enableBluetooth'])->name('bluetooth.enable');
-Route::get('/bluetooth/list', [BluetoothController::class, 'listPDFs'])->name('bluetooth.list');
+
+
+Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth.index');
+Route::post('/bluetooth/enable', [BluetoothController::class, 'enable'])->name('bluetooth.enable');
+Route::get('/bluetooth/print/{filename}', [BluetoothController::class, 'print'])->name('bluetooth.print');
+
 
 // USB Flash Drive flow
 Route::get('/USBFD', [USBController::class, 'index'])->name('usbfd.index');
@@ -68,6 +79,20 @@ Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])-
 Route::get('/usbfd/preview/{filepath}', [USBController::class, 'preview'])
     ->where('filepath', '.*')
     ->name('USBFD.preview');
+//  Coins Slot
+
+
+Route::get('/coin/total', function () {
+    try {
+        $response = Http::timeout(2)->get('http://192.168.0.101:5000/coin/total');
+        return response()->json(['total' => $response->json('total') ?? 0]);
+    } catch (\Exception $e) {
+        return response()->json(['total' => 0]);
+    }
+});
+
+
+
 
 // Admin Pricing
 Route::resource('admin/print-settings', PrintSettingController::class);

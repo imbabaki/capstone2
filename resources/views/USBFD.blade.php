@@ -68,8 +68,7 @@
                 <input type="hidden" name="file" id="selectedFileName">
                 <input type="hidden" name="file_path" id="selectedPDFPath">
                 <input type="hidden" name="total_pages" id="total_pages">
-                <input type="hidden" name="color" id="color_hidden">
-                <input type="hidden" name="calculated_total" id="calculated_total">
+                <input type="hidden" name="total" id="calculated_total">
 
                 <label for="paper_size">Paper Size</label>
                 <select name="paper_size" id="paper_size">
@@ -85,7 +84,7 @@
                 <input type="text" name="pages" id="pages" placeholder="Print all pages">
 
                 <label for="color_option">Color Mode</label>
-                <select name="color_option" id="color_option">
+                <select name="color" id="color_option">
                     <option value="color">Color</option>
                     <option value="grayscale">Grayscale</option>
                 </select>
@@ -186,7 +185,6 @@ function calculateTotal(defaultPages = null) {
 
 window.addEventListener('DOMContentLoaded', () => calculateTotal(parseInt(totalPagesH.value || 1)));
 </script>
-
 
 </body>
 </html>

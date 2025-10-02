@@ -13,7 +13,7 @@ def run_motor(seconds, power_percent):
     :param power_percent: duty cycle (0-100)
     """
     duty_cycle = power_percent / 100.0
-    pulse_time = 0.1  # 100ms pulse resolution
+    pulse_time = 0.1 # 100ms pulse resolution
     end_time = time.time() + seconds
 
     print(f"Running motor {power_percent}% for {seconds} seconds...")
@@ -32,8 +32,10 @@ def run_motor(seconds, power_percent):
     print("Motor stopped.")
 
 try:
-    # Example: 3 seconds at 1% "power" (relay simulation)
-    run_motor(0.6, 1)
+    # Example: 3 
+    # seconds at 1% "power" (relay simulation)
+
+    run_motor(3.35, 1)
 
 finally:
     GPIO.cleanup()

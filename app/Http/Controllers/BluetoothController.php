@@ -3,43 +3,37 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Illuminate\Support\Facades\File;
-
 
 class BluetoothController extends Controller
 {
     public function index()
     {
-        return view('bluetooth');
+        $path = "/home/instaprint/bluetooth_uploads";
+        $files = \File::exists($path)
+            ? collect(\File::files($path))->map(fn($file) => $file->getFilename())
+            : collect([]);
+
+        return view('bluetooth.index', ['files' => $files]);
     }
 
-    public function enableBluetooth(Request $request)
+    public function enable()
     {
-        // Example: run a shell command to enable Bluetooth or start file receive
-        // Replace with your actual command/script
-        $process = new Process(['bash', '-c', 'echo "Simulating Bluetooth receive"']); 
+        // Make Bluetooth discoverable + pairable for 5 minutes
+        shell_exec('echo -e "power on\ndiscoverable on\npairable on\ntimeout discoverable 0\n" | sudo bluetoothctl');
 
-        try {
-            $process->mustRun();
-            return response()->json(['status' => 'Bluetooth enabled and ready to receive PDF.']);
-        } catch (ProcessFailedException $exception) {
-            return response()->json(['status' => 'Failed to enable Bluetooth.']);
+        return back()->with('success', 'Bluetooth is now discoverable! Pair from your phone.');
+    }
+
+    public function print($filename)
+    {
+        $filePath = "/home/instaprint/bluetooth_uploads/" . $filename;
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
         }
-    }
-    public function listPDFs()
-{
-    $path = '/home/instaprint/bluetooth_uploads'; // make sure this folder exists
-    if (!File::exists($path)) {
-        File::makeDirectory($path, 0777, true);
-    }
 
-    $files = collect(File::files($path))
-        ->filter(fn($file) => strtolower($file->getExtension()) === 'pdf')
-        ->map(fn($file) => ['name' => $file->getFilename()])
-        ->values();
+        shell_exec("lp " . escapeshellarg($filePath));
 
-    return response()->json(['pdfFiles' => $files]);
-}
+        return back()->with('success', "Printing: $filename");
+    }
 }

@@ -27,62 +27,6 @@
     'max_age' => 0,
     'supports_credentials' => false,
   ),
-  'broadcasting' => 
-  array (
-    'default' => 'log',
-    'connections' => 
-    array (
-      'reverb' => 
-      array (
-        'driver' => 'reverb',
-        'key' => NULL,
-        'secret' => NULL,
-        'app_id' => NULL,
-        'options' => 
-        array (
-          'host' => NULL,
-          'port' => 443,
-          'scheme' => 'https',
-          'useTLS' => true,
-        ),
-        'client_options' => 
-        array (
-        ),
-      ),
-      'pusher' => 
-      array (
-        'driver' => 'pusher',
-        'key' => NULL,
-        'secret' => NULL,
-        'app_id' => NULL,
-        'options' => 
-        array (
-          'cluster' => NULL,
-          'host' => 'api-mt1.pusher.com',
-          'port' => 443,
-          'scheme' => 'https',
-          'encrypted' => true,
-          'useTLS' => true,
-        ),
-        'client_options' => 
-        array (
-        ),
-      ),
-      'ably' => 
-      array (
-        'driver' => 'ably',
-        'key' => NULL,
-      ),
-      'log' => 
-      array (
-        'driver' => 'log',
-      ),
-      'null' => 
-      array (
-        'driver' => 'null',
-      ),
-    ),
-  ),
   'view' => 
   array (
     'paths' => 
@@ -115,10 +59,10 @@
   ),
   'app' => 
   array (
-    'name' => 'Laravel',
+    'name' => 'InstaPrint',
     'env' => 'local',
     'debug' => true,
-    'url' => 'http://localhost',
+    'url' => 'http://192.168.4.1:8000',
     'frontend_url' => 'http://localhost:3000',
     'asset_url' => NULL,
     'timezone' => 'UTC',
@@ -246,6 +190,69 @@
     ),
     'password_timeout' => 10800,
   ),
+  'broadcasting' => 
+  array (
+    'default' => 'pusher',
+    'connections' => 
+    array (
+      'reverb' => 
+      array (
+        'driver' => 'reverb',
+        'key' => NULL,
+        'secret' => NULL,
+        'app_id' => NULL,
+        'options' => 
+        array (
+          'host' => NULL,
+          'port' => 443,
+          'scheme' => 'https',
+          'useTLS' => true,
+        ),
+        'client_options' => 
+        array (
+        ),
+      ),
+      'pusher' => 
+      array (
+        'driver' => 'pusher',
+        'key' => 'instaprint_key',
+        'secret' => 'instaprint_secret',
+        'app_id' => 'instaprint',
+        'options' => 
+        array (
+          'cluster' => 'mt1',
+          'useTLS' => false,
+          'host' => '192.168.100.132',
+          'port' => 6001,
+          'scheme' => 'http',
+          'encrypted' => false,
+          'curl_options' => 
+          array (
+            81 => 0,
+            64 => 0,
+          ),
+        ),
+      ),
+      'ably' => 
+      array (
+        'driver' => 'ably',
+        'key' => NULL,
+      ),
+      'log' => 
+      array (
+        'driver' => 'log',
+      ),
+      'null' => 
+      array (
+        'driver' => 'null',
+      ),
+      'redis' => 
+      array (
+        'driver' => 'redis',
+        'connection' => 'default',
+      ),
+    ),
+  ),
   'cache' => 
   array (
     'default' => 'database',
@@ -312,7 +319,7 @@
         'driver' => 'octane',
       ),
     ),
-    'prefix' => 'laravel-cache-',
+    'prefix' => 'instaprint-cache-',
   ),
   'database' => 
   array (
@@ -410,7 +417,7 @@
       'options' => 
       array (
         'cluster' => 'redis',
-        'prefix' => 'laravel-database-',
+        'prefix' => 'instaprint-database-',
         'persistent' => false,
       ),
       'default' => 
@@ -450,7 +457,7 @@
       array (
         'driver' => 'local',
         'root' => '/var/www/html/laravel/storage/app/public',
-        'url' => 'http://localhost/storage',
+        'url' => 'http://192.168.4.1:8000/storage',
         'visibility' => 'public',
         'throw' => false,
         'report' => false,
@@ -587,7 +594,7 @@
         'username' => NULL,
         'password' => NULL,
         'timeout' => NULL,
-        'local_domain' => 'localhost',
+        'local_domain' => '192.168.4.1',
       ),
       'ses' => 
       array (
@@ -639,7 +646,7 @@
     'from' => 
     array (
       'address' => 'hello@example.com',
-      'name' => 'Laravel',
+      'name' => 'InstaPrint',
     ),
     'markdown' => 
     array (
@@ -750,7 +757,7 @@
       0 => 2,
       1 => 100,
     ),
-    'cookie' => 'laravel_session',
+    'cookie' => 'insta_print_session',
     'path' => '/',
     'domain' => NULL,
     'secure' => NULL,

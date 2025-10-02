@@ -8,6 +8,7 @@ use App\Models\PrintSetting;
 use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Http;
 
 class USBController extends Controller
 {
@@ -188,12 +189,26 @@ class USBController extends Controller
         return redirect()->route('usbfd.payment');
     }
 
-    public function paymentPage(Request $request)
-    {
-        $order = session('usb.order');
-        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No job in progress.');
-        return view('USBFD.payment', ['order' => $order]);
+
+
+public function paymentPage(Request $request)
+{
+    $order = session('usb.order');
+    if (!$order) return redirect()->route('usbfd.index')->with('error', 'No job in progress.');
+
+    try {
+        $response = Http::timeout(2)->get('http://192.168.0.101:5000/coin/total');
+        $coinTotal = $response->json('total') ?? 0;
+    } catch (\Exception $e) {
+        $coinTotal = 0; // fallback if Pi is offline
     }
+
+    return view('USBFD.payment', [
+        'order'     => $order,
+        'coinTotal' => $coinTotal,
+    ]);
+}
+
 
     public function doFinalPrint(Request $request)
     {
@@ -265,32 +280,66 @@ class USBController extends Controller
         return Response::file($filepath, ['Content-Type' => 'application/pdf']);
     }
 
-    public function processPayment(Request $request)
-    {
-        $usbPath = $this->getMountedUsbPath();
-        if (!$usbPath) return redirect()->route('usbfd.index')->with('error', 'USB not mounted.');
+   public function processPayment(Request $request)
+{
+    $usbPath = $this->getMountedUsbPath();
+    if (!$usbPath) return redirect()->route('usbfd.index')->with('error', 'USB not mounted.');
 
-        $realPath = realpath($request->input('file_path'));
-        if (!$realPath || strpos($realPath, realpath($usbPath)) !== 0) {
-            return redirect()->route('usbfd.index')->with('error', 'Invalid file path.');
-        }
-
-        $order = [
-            'file_name'  => basename($realPath),
-            'file_path'  => $realPath,
-            'copies'     => $request->input('copies'),
-            'pages'      => $request->input('pages'),
-            'color'      => $request->input('color'),
-            'paper_size' => $request->input('paper_size'),
-            'duplex'     => $request->input('duplex'),
-            'total'      => $request->input('total'),
-            'paid'       => false,
-        ];
-
-        session(['usb.order' => $order]);
-
-        return view('USBFD.payment', compact('order'));
+    $realPath = realpath($request->input('file_path'));
+    if (!$realPath || strpos($realPath, realpath($usbPath)) !== 0) {
+        return redirect()->route('usbfd.index')->with('error', 'Invalid file path.');
     }
+
+    $copies    = (int) $request->input('copies', 1);
+    $pages     = $request->input('pages');
+    $color     = $request->input('color');
+    $paperSize = $request->input('paper_size');
+    $rate      = $this->getRatePerPage($paperSize, $color) ?? 0;
+
+    $pageCount = $this->countPagesFromRanges($pages);
+    if ($pageCount === 0) {
+        try {
+            $parser = new Parser();
+            $pdf    = $parser->parseFile($realPath);
+            $pageCount = max(1, count($pdf->getPages()));
+        } catch (\Throwable $e) {
+            $pageCount = 1;
+        }
+    }
+
+    $subtotal = $copies * $pageCount * $rate;
+
+    $order = [
+        'file_name'  => basename($realPath),
+        'file_path'  => $realPath,
+        'copies'     => $copies,
+        'pages'      => $pages,
+        'page_count' => $pageCount,
+        'color'      => $color,
+        'paper_size' => $paperSize,
+        'duplex'     => $request->input('duplex', 'one-sided'),
+        'rate'       => $rate,
+        'subtotal'   => $subtotal,
+        'total'      => $subtotal,
+        'paid'       => false,
+    ];
+
+    session(['usb.order' => $order]);
+
+    // ✅ Add coinTotal here
+    try {
+        $response = Http::timeout(2)->get('http://192.168.0.101:5000/coin/total');
+        $coinTotal = $response->json('total') ?? 0;
+    } catch (\Exception $e) {
+        $coinTotal = 0;
+    }
+
+    return view('USBFD.payment', [
+        'order'     => $order,
+        'coinTotal' => $coinTotal,
+    ]);
+}
+
 
     public function handlePayment(Request $request)
     {

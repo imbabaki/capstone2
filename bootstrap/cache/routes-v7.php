@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lnlDsVQBuK3yqs3n',
+            '_route' => 'generated::iSVXWptRMd8iHTZx',
           ),
           1 => NULL,
           2 => 
@@ -27,7 +27,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/start' => 
+      '/' => 
       array (
         0 => 
         array (
@@ -93,7 +93,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::CdkqwAv6JDMMe8Dj',
+            '_route' => 'generated::fvFI09NvAiNKUmry',
           ),
           1 => NULL,
           2 => 
@@ -154,8 +154,7 @@ app('router')->setCompiledRoutes(
           1 => NULL,
           2 => 
           array (
-            'GET' => 0,
-            'HEAD' => 1,
+            'POST' => 0,
           ),
           3 => NULL,
           4 => false,
@@ -202,13 +201,33 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/check-upload' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.check',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
       '/bluetooth' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'bluetooth',
+            '_route' => 'bluetooth.index',
           ),
           1 => NULL,
           2 => 
@@ -234,26 +253,6 @@ app('router')->setCompiledRoutes(
           2 => 
           array (
             'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/bluetooth/list' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'bluetooth.list',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
           ),
           3 => NULL,
           4 => false,
@@ -436,6 +435,26 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/coin/total' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'generated::7zA0nWLKB60YKi9Y',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
       '/admin/print-settings' => 
       array (
         0 => 
@@ -498,7 +517,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::oVGwX9zQ3rjnbBbT',
+            '_route' => 'generated::f1eNWBkTBpPSAZzs',
           ),
           1 => NULL,
           2 => 
@@ -515,7 +534,7 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/admin/print\\-settings/([^/]++)(?|(*:97)|/edit(*:109)|(*:117))|/storage/(.*)(*:139))/?$}sDu',
+      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/bluetooth/print/([^/]++)(*:88)|/admin/print\\-settings/([^/]++)(?|(*:129)|/edit(*:142)|(*:150))|/storage/(.*)(*:172))/?$}sDu',
     ),
     3 => 
     array (
@@ -565,7 +584,30 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      97 => 
+      88 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'bluetooth.print',
+          ),
+          1 => 
+          array (
+            0 => 'filename',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      129 => 
       array (
         0 => 
         array (
@@ -588,7 +630,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      109 => 
+      142 => 
       array (
         0 => 
         array (
@@ -611,7 +653,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      117 => 
+      150 => 
       array (
         0 => 
         array (
@@ -653,7 +695,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      139 => 
+      172 => 
       array (
         0 => 
         array (
@@ -691,7 +733,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::lnlDsVQBuK3yqs3n' => 
+    'generated::iSVXWptRMd8iHTZx' => 
     array (
       'methods' => 
       array (
@@ -719,8 +761,8 @@ app('router')->setCompiledRoutes(
                     return response(\\Illuminate\\Support\\Facades\\View::file(\'/var/www/html/laravel/vendor/laravel/framework/src/Illuminate/Foundation/Configuration\'.\'/../resources/health-up.blade.php\', [
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
-                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004c90000000000000000";}}',
-        'as' => 'generated::lnlDsVQBuK3yqs3n',
+                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004ca0000000000000000";}}',
+        'as' => 'generated::iSVXWptRMd8iHTZx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -743,7 +785,7 @@ app('router')->setCompiledRoutes(
         0 => 'GET',
         1 => 'HEAD',
       ),
-      'uri' => 'start',
+      'uri' => '/',
       'action' => 
       array (
         'middleware' => 
@@ -752,7 +794,7 @@ app('router')->setCompiledRoutes(
         ),
         'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:42:"function () {
     return \\view(\'start\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004cf0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004d00000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -848,7 +890,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::CdkqwAv6JDMMe8Dj' => 
+    'generated::fvFI09NvAiNKUmry' => 
     array (
       'methods' => 
       array (
@@ -864,13 +906,13 @@ app('router')->setCompiledRoutes(
         ),
         'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:61:"function () {
     return \\redirect()->route(\'upload.form\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004d30000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004d40000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::CdkqwAv6JDMMe8Dj',
+        'as' => 'generated::fvFI09NvAiNKUmry',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1000,8 +1042,7 @@ app('router')->setCompiledRoutes(
     array (
       'methods' => 
       array (
-        0 => 'GET',
-        1 => 'HEAD',
+        0 => 'POST',
       ),
       'uri' => 'upload/payment',
       'action' => 
@@ -1106,7 +1147,44 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'bluetooth' => 
+    'upload.check' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'check-upload',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@checkUpload',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@checkUpload',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.check',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'bluetooth.index' => 
     array (
       'methods' => 
       array (
@@ -1127,7 +1205,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'bluetooth',
+        'as' => 'bluetooth.index',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1156,8 +1234,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
         ),
-        'uses' => 'App\\Http\\Controllers\\BluetoothController@enableBluetooth',
-        'controller' => 'App\\Http\\Controllers\\BluetoothController@enableBluetooth',
+        'uses' => 'App\\Http\\Controllers\\BluetoothController@enable',
+        'controller' => 'App\\Http\\Controllers\\BluetoothController@enable',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -1179,28 +1257,28 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'bluetooth.list' => 
+    'bluetooth.print' => 
     array (
       'methods' => 
       array (
         0 => 'GET',
         1 => 'HEAD',
       ),
-      'uri' => 'bluetooth/list',
+      'uri' => 'bluetooth/print/{filename}',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'web',
         ),
-        'uses' => 'App\\Http\\Controllers\\BluetoothController@listPDFs',
-        'controller' => 'App\\Http\\Controllers\\BluetoothController@listPDFs',
+        'uses' => 'App\\Http\\Controllers\\BluetoothController@print',
+        'controller' => 'App\\Http\\Controllers\\BluetoothController@print',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'bluetooth.list',
+        'as' => 'bluetooth.print',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1582,6 +1660,49 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'generated::7zA0nWLKB60YKi9Y' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'coin/total',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:300:"function () {
+    try {
+        $response = \\Illuminate\\Support\\Facades\\Http::timeout(2)->get(\'http://192.168.0.101:5000/coin/total\');
+        return \\response()->json([\'total\' => $response->json(\'total\') ?? 0]);
+    } catch (\\Exception $e) {
+        return \\response()->json([\'total\' => 0]);
+    }
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ea0000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'generated::7zA0nWLKB60YKi9Y',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'admin.print-settings.index' => 
     array (
       'methods' => 
@@ -1839,7 +1960,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::oVGwX9zQ3rjnbBbT' => 
+    'generated::f1eNWBkTBpPSAZzs' => 
     array (
       'methods' => 
       array (
@@ -1871,13 +1992,13 @@ app('router')->setCompiledRoutes(
         ->filter(fn($file) => \\strtolower($file->getExtension()) === \'pdf\');
 
     return \\response()->json([\'count\' => $files->count()]);
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004e80000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ec0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::oVGwX9zQ3rjnbBbT',
+        'as' => 'generated::f1eNWBkTBpPSAZzs',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1909,7 +2030,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004eb0000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004ef0000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

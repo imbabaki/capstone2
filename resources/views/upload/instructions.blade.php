@@ -28,7 +28,7 @@
         <li>File: {{ $order['file_name'] }}</li>
         <li>Copies: {{ $order['copies'] }}</li>
         <li>Pages: {{ $order['pages'] ?: 'All' }}</li>
-        <li>Color: {{ ucfirst($order['color']) }}</li>
+        <li>Color: {{ ucfirst($order['color'] ?? $order['color_option'] ?? 'N/A') }}</li>
         <li>Paper: {{ $order['paper_size'] }}</li>
         <li>Duplex: {{ $order['duplex'] }}</li>
     </ul>

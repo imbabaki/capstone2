@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+
 
 class BluetoothController extends Controller
 {
     public function index()
     {
-        $path = "/home/instaprint/bluetooth_uploads";
-        $files = \File::exists($path)
-            ? collect(\File::files($path))->map(fn($file) => $file->getFilename())
-            : collect([]);
+        $path = "/home/instaprint/uploads";
+            $files = File::exists($path)
+                ? collect(File::files($path))->map(function($file) {
+                 return $file->getFilename();
+                 })
+                : collect([]);
 
-        return view('bluetooth.index', ['files' => $files]);
+            return view('bluetooth.index', ['files' => $files]);
     }
 
     public function enable()

@@ -1,631 +1,232 @@
-find the wrong of this why it wont function: 
-
-this is my env. 
-
-APP_NAME=InstaPrint
-APP_ENV=local
-APP_KEY=base64:+utQPBWiumnkpGxtiTjaTTAKEoTUAt5MUOusB7RJHhM=
-APP_DEBUG=true
-APP_URL=http://192.168.4.1:8000
-
-APP_LOCALE=en
-APP_FALLBACK_LOCALE=en
-APP_FAKER_LOCALE=en_US
-
-APP_MAINTENANCE_DRIVER=file
-# APP_MAINTENANCE_STORE=database
-
-PHP_CLI_SERVER_WORKERS=4
-
-BCRYPT_ROUNDS=12
-
-LOG_CHANNEL=stack
-LOG_STACK=single
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
-DB_CONNECTION=sqlite
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=/var/www/html/laravel/database/database.sqlite
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-SESSION_PATH=/
-SESSION_DOMAIN=null
-
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-
-CACHE_STORE=database
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_CLIENT=phpredis
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=log
-MAIL_SCHEME=null
-MAIL_HOST=127.0.0.1
-MAIL_PORT=2525
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-VITE_APP_NAME="${APP_NAME}"
-
-BROADCAST_DRIVER=pusher
-PUSHER_APP_ID=instaprint
-PUSHER_APP_KEY=instaprint_key
-PUSHER_APP_SECRET=instaprint_secret
-PUSHER_APP_CLUSTER=mt1
-PUSHER_HOST=192.168.4.1
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
+what i want is to open the bluetooth of the raspi 4 model b and the phone will connect to send the pdf file of what they want to be print 
 
 
-
-this my Events/Fileuploaded
+this is my routes/web.php
 
 <?php
 
-namespace App\Events;
-
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
-
-class FileUploaded implements ShouldBroadcast
-{
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    public $filename;
-
-    public function __construct($filename)
-    {
-        $this->filename = $filename;
-    }
-
-    public function broadcastOn()
-    {
-        return new Channel('file-uploads'); // public channel
-    }
-
-    public function broadcastAs()
-    {
-        return 'FileUploaded'; // event name for frontend
-    }
-}
-
-this my FileUploadController.php
-
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use App\Models\PrintSetting;
-use App\Events\FileUploaded;
-
-class FileUploadController extends Controller
-{
-    // Show upload form
-    public function showForm()
-    {
-        return view('upload_form');
-    }
-
-    // Handle file upload (from phone)
-public function store(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:pdf,jpg,png|max:10240',
-    ]);
-
-    $file = $request->file('file');
-    $filename = time() . '_' . $file->getClientOriginalName();
-    $file->move(public_path('uploads'), $filename);
-
-    // ✅ Save latest upload for kiosk polling
-    $latestPath = storage_path('app/latest_upload.json');
-    file_put_contents($latestPath, json_encode([
-        'filename'  => $filename,
-        'timestamp' => now()->toDateTimeString(),
-    ]));
-
-    // 🔔 Broadcast event to WebSocket listeners
-    event(new FileUploaded($filename));
-
-    // Phone: show success page
-    return response()->view('upload_success', [
-        'filename' => $filename
-    ]);
-}
-
-    // Show edit page (kiosk after auto-redirect)
-    public function edit($filename)
-    {
-        $fileUrl = asset('uploads/' . $filename);
-        $pricing = PrintSetting::all();
-        $order   = session('usb.order', []);
-
-        return view('edit_upload', compact('fileUrl', 'filename', 'pricing', 'order'));
-    }
-
-    // Final print command
-    public function doFinalPrint(Request $request)
-    {
-        $order = session('usb.order');
-
-        if (!$order) {
-            return back()->with('error', 'No order in session.');
-        }
-
-        $filePath = public_path('uploads/' . $order['file_name']);
-
-        if (!File::exists($filePath)) {
-            Log::error('Print failed: File not found', ['path' => $filePath]);
-            return back()->with('error', 'File not found: ' . $filePath);
-        }
-
-        $printer = $order['printer'] ?? 'EPSON_L120_Series';
-        $copies  = (int)($order['copies'] ?? 1);
-        $pages   = $order['pages'] ?? 1;
-        $color   = $order['color'] ?? 'color';
-        $paper   = $order['paper_size'] ?? null;
-        $duplex  = $order['duplex'] ?? 'one-sided';
-        $fit     = $order['fit'] ?? 'none';
-
-        $cmd = ['lp', '-d', $printer, '-n', (string) max(1, $copies)];
-
-        if (!empty($pages)) {
-            $cmd[] = '-o';
-            $cmd[] = 'page-ranges=' . $pages;
-        }
-
-        $cmd[] = '-o';
-        $cmd[] = ($color === 'grayscale') ? 'ColorModel=Gray' : 'ColorModel=RGB';
-
-        if ($paper) {
-            $cmd[] = '-o';
-            $cmd[] = 'media=' . $paper;
-        }
-
-        if (in_array($duplex, ['one-sided','two-sided-long-edge','two-sided-short-edge'], true)) {
-            $cmd[] = '-o';
-            $cmd[] = 'sides=' . $duplex;
-        }
-
-        if ($fit === 'fit-to-page') {
-            $cmd[] = '-o';
-            $cmd[] = 'fit-to-page';
-        }
-
-        $cmd[] = $filePath;
-
-        $escaped = array_map('escapeshellarg', $cmd);
-        $final   = implode(' ', $escaped) . ' 2>&1';
-
-        Log::info('CUPS print command', ['cmd' => $final]);
-
-        $output  = shell_exec($final);
-
-        Log::info('CUPS output', ['output' => $output]);
-
-        return redirect()->route('USBFD.success')->with('success', 'Print job sent: ' . $output);
-    }
-
-    // Payment summary
-    public function paymentPage()
-    {
-        $order = session('usb.order');
-        if (!$order) {
-            return redirect()->route('upload.form')->with('error', 'No order found.');
-        }
-
-        return view('upload.payment', compact('order'));
-    }
-
-    // Instructions
-    public function instruction()
-    {
-        $order = session('usb.order');
-        if (!$order) {
-            return redirect()->route('upload.form')->with('error', 'No order found.');
-        }
-
-        return view('upload.instructions', compact('order'));
-    }
-
-    // ✅ New: kiosk polling to check upload
-    public function checkUpload()
-    {
-        $latestPath = storage_path('app/latest_upload.json');
-
-        if (!File::exists($latestPath)) {
-            return response()->json(['filename' => null]);
-        }
-
-        $data = json_decode(file_get_contents($latestPath), true);
-
-        // Clear file after sending (so kiosk won’t loop forever)
-        if (!empty($data['filename'])) {
-            $filename = $data['filename'];
-
-            // Reset JSON so next poll waits for new upload
-            file_put_contents($latestPath, json_encode(['filename' => null]));
-
-            return response()->json([
-                'filename'  => $filename,
-                'timestamp' => $data['timestamp'] ?? null,
-            ]);
-        }
-
-        return response()->json(['filename' => null]);
-    }
-}
-
-this is my QRCodeController.php
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BluetoothController;
+use App\Http\Controllers\USBController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Admin\PrintSettingController;
+use App\Http\Controllers\OptionsController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Http;
 
-class QRCodeController extends Controller
-{
-    public function show()
-    {
-        $uploadUrl = 'http://192.168.4.1:8000/upload'; //change to actual to your ip address
-        
-        $qr = QrCode::size(300)->generate($uploadUrl);
-        return view('qr_code', [
-            'qr' => $qr,
-            'uploadUrl' => $uploadUrl
-        ]);
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+
+// Start screen
+Route::get('/', function () {
+    return view('start');
+})->name('start');
+
+// Options
+Route::get('/options', [OptionsController::class, 'index'])->name('options');
+
+// QR Code
+Route::get('/qr-code', [QRCodeController::class, 'show'])->name('qr.code');
+
+// Upload routes
+
+Route::get('/upload', function () {
+    return redirect()->route('upload.form');
+});
+
+Route::get('/upload/form', [FileUploadController::class, 'showForm'])->name('upload.form');
+Route::post('/upload/form', [FileUploadController::class, 'store'])->name('upload.store');
+
+// Edit settings
+Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
+
+// Payment summary (GET only)
+Route::post('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
+
+// Instructions page (GET only)
+Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
+
+// Print (POST only)
+Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
+
+// ✅ Check if a file has been uploaded (for kiosk auto-redirect)
+Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
+
+
+
+
+// Bluetooth functionality
+
+
+Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth.index');
+Route::post('/bluetooth/enable', [BluetoothController::class, 'enable'])->name('bluetooth.enable');
+Route::get('/bluetooth/print/{filename}', [BluetoothController::class, 'print'])->name('bluetooth.print');
+
+
+// USB Flash Drive flow
+Route::get('/USBFD', [USBController::class, 'index'])->name('usbfd.index');
+Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('usbfd.preview');
+Route::post('/USBFD/review', [USBController::class, 'review'])->name('usbfd.review');
+Route::post('/usbfd/process', [USBController::class, 'processPayment'])->name('usbfd.process');
+Route::post('/usbfd/payment', [USBController::class, 'handlePayment'])->name('usbfd.payment.handle');
+Route::get('/usbfd/instruction', [USBController::class, 'instruction'])->name('usbfd.instruction');
+Route::post('/usb/print', [USBController::class, 'doFinalPrint'])->name('usb.print');
+Route::get('/USBFD/success', [USBController::class, 'success'])->name('usb.success');
+Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])->name('USBFD.processPayment');
+Route::get('/usbfd/preview/{filepath}', [USBController::class, 'preview'])
+    ->where('filepath', '.*')
+    ->name('USBFD.preview');
+//  Coins Slot
+
+
+Route::get('/coin/total', function () {
+    try {
+        $response = Http::timeout(2)->get('http://192.168.0.101:5000/coin/total');
+        return response()->json(['total' => $response->json('total') ?? 0]);
+    } catch (\Exception $e) {
+        return response()->json(['total' => 0]);
     }
-}
-
-
-this my config/broadcasting.php
-
-<?php
-
-return [
-
-    'default' => env('BROADCAST_DRIVER', 'null'),
-
-    'connections' => [
-
-        'pusher' => [
-            'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
-            'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true,
-                'host' => env('PUSHER_HOST', '127.0.0.1'),
-                'port' => env('PUSHER_PORT', 6001),
-                'scheme' => env('PUSHER_SCHEME', 'http'),
-            ],
-        ],
-
-        'redis' => [
-            'driver' => 'redis',
-            'connection' => 'default',
-        ],
-
-        'log' => [
-            'driver' => 'log',
-        ],
-
-        'null' => [
-            'driver' => 'null',
-        ],
-
-    ],
-
-];
-
-
-this is my resources/views/qr_code.blade.php 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>QR Code Upload</title>
-    <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
-    <script src="{{ asset('js/echo.js') }}"></script> <!-- if you compiled Echo via Mix -->
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f8f8f8;
-        }
-        h2 { margin-bottom: 20px; }
-        .qr-container {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        a { display: block; margin-top: 20px; text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-
-<div class="qr-container">
-    <h2>Scan this QR code to upload a file</h2>
-    <div>{!! $qr !!}</div>
-    <p>Or click: <a href="{{ $uploadUrl }}">{{ $uploadUrl }}</a></p>
-</div>
-
-   window.Pusher = Pusher;
-    const echo = new Echo({
-        broadcaster: 'pusher',
-        key: '{{ env("PUSHER_APP_KEY") }}',
-        cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-        wsHost: '{{ env("PUSHER_HOST") }}', // LAN IP of your Pi
-        wsPort: {{ env("PUSHER_PORT") }},
-        forceTLS: false,
-        encrypted: false,
-        disableStats: true,
-    });
-
-</body>
-</html>
-
-and this my resources/views/upload.blade.php
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload File</title>
-    <!-- Add Laravel Echo & Pusher JS -->
-    <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.2.0/dist/web/pusher.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.11.3/dist/echo.iife.js"></script>
-</head>
-<body>
-    <h2>Upload Your File</h2>
-
-    @if(session('success'))
-        <p style="color: green;">{{ session('success') }}</p>
-        @if(session('filename'))
-            <p>Uploaded: {{ session('filename') }}</p>
-        @endif
-    @endif
-
-    <form method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" required>
-        <button type="submit">Upload</button>
-    </form>
-
-<script>
-    // Setup Laravel Echo with Pusher
-    window.Pusher = Pusher;
-
-const echo = new Echo({
-    broadcaster: 'pusher',
-    key: '{{ env("PUSHER_APP_KEY") }}',
-    cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-    wsHost: '{{ env("PUSHER_HOST") }}',
-    wsPort: '{{ env("PUSHER_PORT") }}',
-    forceTLS: false,
-    encrypted: false,
-    disableStats: true,
 });
 
 
-    // Listen to the "file-uploads" channel for FileUploaded events
-    echo.channel('file-uploads')
-        .listen('FileUploaded', (e) => {
-            console.log('Broadcast received:', e);
-            if (e.filename) {
-                window.location.href = `/upload/edit/${e.filename}`;
-            }
-        });
 
-    // Optional: polling fallback every 3 seconds
-    async function checkUpload() {
-        try {
-            const response = await fetch('/check-upload');
-            const data = await response.json();
 
-            if (data.filename) {
-                window.location.href = `/upload/edit/${data.filename}`;
-            }
-        } catch (error) {
-            console.error('Error checking upload:', error);
-        }
+// Admin Pricing
+Route::resource('admin/print-settings', PrintSettingController::class);
+Route::get('/admin/print-settings', [PrintSettingController::class, 'index'])->name('admin.print-settings.index');
+
+// Realtime USB Flash drive detection
+Route::get('/usb-check', function () {
+    $user = trim(shell_exec('whoami'));
+    $possiblePaths = ["/media/$user", "/media/usb", "/mnt/usb"];
+
+    $mountedUSBs = collect($possiblePaths)
+        ->filter(fn($path) => File::exists($path))
+        ->flatMap(fn($path) => File::directories($path))
+        ->values();
+
+    if ($mountedUSBs->isEmpty()) {
+        return response()->json(['count' => 0]);
     }
 
-    setInterval(checkUpload, 3000);
-</script>
-</body>
-</html>
+    $usbPath = $mountedUSBs->first();
+    $files = collect(File::files($usbPath))
+        ->filter(fn($file) => strtolower($file->getExtension()) === 'pdf');
 
-and this is my resources/views/upload.form.blade.php
+    return response()->json(['count' => $files->count()]);
+});
+
+and this is my bluetoothcontroller.php 
+
 
 <?php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
-class UploadController extends Controller
+class BluetoothController extends Controller
 {
-    /**
-     * Display the file upload form.
-     */
-    public function showUploadForm()
+    public function index()
     {
-        return view('upload'); // Make sure this Blade file exists: resources/views/upload.blade.php
+        $path = "/home/instaprint/bluetooth_uploads";
+        $files = \File::exists($path)
+            ? collect(\File::files($path))->map(fn($file) => $file->getFilename())
+            : collect([]);
+
+        return view('bluetooth.index', ['files' => $files]);
     }
 
-    /**
-     * Handle the uploaded file.
-     */
-    public function handleUpload(Request $request)
+    public function enable()
     {
-        $request->validate([
-            'file' => 'required|file|max:10240', // 10MB limit example
-        ]);
+        // Make Bluetooth discoverable + pairable for 5 minutes
+        shell_exec('echo -e "power on\ndiscoverable on\npairable on\ntimeout discoverable 0\n" | sudo bluetoothctl');
 
-        // Store in public disk, inside uploads/
-        $path = $request->file('file')->store('uploads', 'public');
+        return back()->with('success', 'Bluetooth is now discoverable! Pair from your phone.');
+    }
 
-        return redirect()->route('upload.form')->with('success', 'File uploaded successfully!');
+    public function print($filename)
+    {
+        $filePath = "/home/instaprint/bluetooth_uploads/" . $filename;
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        shell_exec("lp " . escapeshellarg($filePath));
+
+        return back()->with('success', "Printing: $filename");
     }
 }
 
-this my edit_upload.blade.php and this where i want to after it detect this will go 
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit & Print</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-        .container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
-        .preview, .options { flex: 1; min-width: 300px; background: white; padding: 20px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .preview iframe, .preview img { width: 100%; height: 700px; border: none; object-fit: contain; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        select, input { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
-        button { margin-top: 20px; padding: 10px; width: 100%; background-color: #28a745; border: none; color: white; font-size: 16px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        @media (max-width:768px) { .container { flex-direction: column; } .preview iframe, .preview img { height: 400px; } }
-    </style>
-</head>
-<body>
-<h2>File Preview and Print Options</h2>
+
+and this is my resources/bluetooth/index.blade.php 
+
 
 <div class="container">
-    <div class="preview">
-        @if(Str::endsWith($fileUrl, '.pdf'))
-            <iframe src="{{ $fileUrl }}"></iframe>
-        @else
-            <img src="{{ $fileUrl }}" alt="Preview">
-        @endif
-    </div>
+    <h2>Bluetooth Received Files</h2>
 
-    <div class="options">
-        <form action="{{ route('upload.payment') }}" method="GET">
-            @csrf
-            <input type="hidden" name="file_name" value="{{ $filename }}">
+    <form action="{{ route('bluetooth.enable') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-success mb-3">
+            Enable Bluetooth Pairing
+        </button>
+    </form>
 
-            <label for="copies">Copies</label>
-            <input type="number" id="copies" name="copies" value="{{ $order['copies'] ?? 1 }}" min="1">
+    <div id="progress-area"></div>
 
-            <label for="pages">Pages (e.g., 1-3,5)</label>
-            <input type="text" id="pages" name="pages" value="{{ $order['pages'] ?? 1}}">
-
-            <label for="color_option">Color</label>
-            <select id="color_option" name="color_option">
-                <option value="color" {{ ($order['color'] ?? '')=='color' ? 'selected' : '' }}>Color</option>
-                <option value="grayscale" {{ ($order['color'] ?? '')=='grayscale' ? 'selected' : '' }}>Grayscale</option>
-            </select>
-
-            <label for="paper_size">Paper Size</label>
-            <select id="paper_size" name="paper_size">
-                <option value="A4" {{ ($order['paper_size'] ?? '')=='A4' ? 'selected' : '' }}>A4</option>
-                <option value="Letter" {{ ($order['paper_size'] ?? '')=='Letter' ? 'selected' : '' }}>Letter</option>
-            </select>
-
-            <label for="duplex">Duplex</label>
-            <select id="duplex" name="duplex">
-                <option value="one-sided" {{ ($order['duplex'] ?? '')=='one-sided' ? 'selected' : '' }}>One-sided</option>
-                <option value="two-sided-long-edge" {{ ($order['duplex'] ?? '')=='two-sided-long-edge' ? 'selected' : '' }}>Two-sided Long Edge</option>
-                <option value="two-sided-short-edge" {{ ($order['duplex'] ?? '')=='two-sided-short-edge' ? 'selected' : '' }}>Two-sided Short Edge</option>
-            </select>
-
-            <label for="fit">Fit</label>
-            <select id="fit" name="fit">
-                <option value="none" {{ ($order['fit'] ?? '')=='none' ? 'selected' : '' }}>None</option>
-                <option value="fit-to-page" {{ ($order['fit'] ?? '')=='fit-to-page' ? 'selected' : '' }}>Fit to Page</option>
-            </select>
-
-            <label for="totalAmount">Total</label>
-            <input type="text" id="totalAmount" readonly>
-            <input type="hidden" id="calculated_total" name="calculated_total">
-
-            <button type="submit">Proceed</button>
-        </form>
-    </div>
+    <ul id="file-list">
+        @foreach($files as $file)
+            <li>
+                {{ $file }}
+                <a href="{{ route('bluetooth.print', $file) }}" class="btn btn-primary btn-sm">Print</a>
+            </li>
+        @endforeach
+    </ul>
 </div>
 
+
+@push('scripts')
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
-const prices = @json($pricing);
-const paperSize = document.getElementById('paper_size');
-const color = document.getElementById('color_option');
-const copies = document.getElementById('copies');
-const pages = document.getElementById('pages');
-const duplex = document.getElementById('duplex');
-const fit = document.getElementById('fit');
-const totalAmount = document.getElementById('totalAmount');
-const hiddenTotal = document.getElementById('calculated_total');
+    const socket = io("http://127.0.0.1:5000"); // Flask runs here
 
-function calculateTotal() {
-    const size = paperSize.value;
-    const col = color.value;
-    const numCopies = parseInt(copies.value) || 1;
-    const numPages = parseInt(pages.value.split(',').length) || 1; // simple page count
-    const side = duplex.value;
+    socket.on("progress", (data) => {
+        let bar = document.getElementById("progress-" + data.filename);
+        if (!bar) {
+            document.getElementById("progress-area").innerHTML += `
+                <div class="mb-2">
+                    <strong>${data.filename}</strong>
+                    <div class="progress">
+                        <div id="progress-${data.filename}" class="progress-bar" 
+                            role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                </div>`;
+            bar = document.getElementById("progress-" + data.filename);
+        }
+        bar.style.width = data.percent + "%";
+        bar.innerText = data.percent + "%";
+    });
 
-    const match = prices.find(p => 
-        p.paper_size === size &&
-        p.color_option === col &&
-        (p.duplex ?? 'one-sided') === side
-    );
-
-    if (match) {
-        const total = match.price * numCopies * numPages;
-        totalAmount.value = '₱' + total.toFixed(2);
-        hiddenTotal.value = total.toFixed(2);
-    } else {
-        totalAmount.value = 'N/A';
-        hiddenTotal.value = '';
-    }
-}
-
-[paperSize, color, copies, pages, duplex, fit].forEach(el => {
-    el.addEventListener('input', calculateTotal);
-    el.addEventListener('change', calculateTotal);
-});
-
-window.onload = calculateTotal;
+    socket.on("new_file", (data) => {
+        document.getElementById("file-list").innerHTML += `
+            <li>
+                ${data.filename}
+                <a href="/bluetooth/print/${data.filename}" class="btn btn-primary btn-sm">Print</a>
+            </li>`;
+    });
 </script>
-</body>
-</html>
 
 
-im using a soketi to listen when i scan the qr and after i upload it should be the http://127.0.0.1:8000/qr-code
-which where i scan from should detect and will automatically redirect to edit page with the file that i uploaded using my phone 
+
+i want you to review and guide me on how to do it step by step and after the send file from the bluetooth i want also to automatically redirect also the from the page bluetooth to the upload/edit page so that it will continue with the file that has been uploaded. 
+

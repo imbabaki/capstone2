@@ -1,3 +1,4 @@
+
 <div class="container">
     <h2>Bluetooth Received Files</h2>
 
@@ -21,10 +22,22 @@
 </div>
 
 
-@push('scripts')
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
-    const socket = io("http://127.0.0.1:5000"); // Flask runs here
+
+    console.log("Connecting to Socket.IO...");
+
+    const socket = io("http://192.168.4.1:5000", {
+        transports: ["websocket", "polling"] // ✅ Ensures fallback
+    });
+
+    socket.on("connect", () => {
+        console.log("✅ Socket.IO Connected!");
+    });
+
+    socket.on("connect_error", (err) => {
+        console.error("❌ Connection Error:", err);
+    });
 
     socket.on("progress", (data) => {
         let bar = document.getElementById("progress-" + data.filename);
@@ -44,10 +57,18 @@
     });
 
     socket.on("new_file", (data) => {
+        console.log("📁 New file received:", data);
+
         document.getElementById("file-list").innerHTML += `
             <li>
                 ${data.filename}
                 <a href="/bluetooth/print/${data.filename}" class="btn btn-primary btn-sm">Print</a>
             </li>`;
+
+        // ✅ Redirect (Fallback if no redirect sent)
+        const redirectUrl = data.redirect || `/edit/upload/${data.filename}`;
+        console.log("🔀 Redirecting to:", redirectUrl);
+        window.location.href = redirectUrl;
     });
 </script>
+

@@ -12,6 +12,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
@@ -32,5 +33,7 @@
                  @yield('content')
             </main>
         </div>
+        @stack('scripts') <!-- ✅ THIS MAKES YOUR SOCKET.IO CODE LOAD -->   
+
     </body>
 </html>

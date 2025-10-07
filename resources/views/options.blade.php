@@ -44,8 +44,8 @@
 <div class="text-center mt-5">
     <h1>Select Upload Method</h1>
     <div class="mt-4 d-flex justify-content-center gap-3">
-        <a href="{{ route('bluetooth') }}" class="btn btn-primary btn-lg">Bluetooth</a>
-        <a href="{{ route('USBFD') }}" class="btn btn-primary btn-lg">USB Flash Drive</a>
+        <a href="{{ route('bluetooth.index') }}" class="btn btn-primary btn-lg">Bluetooth</a>
+        <a href="{{ route('usbfd.index') }}" class="btn btn-primary btn-lg">USB Flash Drive</a>
         <a href="{{ route('qr.code') }}" class="btn btn-success btn-lg">QR Code</a>
     </div>
 </div>  

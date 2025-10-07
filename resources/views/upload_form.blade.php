@@ -63,16 +63,12 @@
         </ul>
     @endif
 
-    <form method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" id="fileInput" accept=".pdf,image/*" required><br><br>
-
-        <div id="preview-container">
-            <div id="preview"></div>
-        </div>
-
-        <button type="submit">Upload</button>
-    </form>
+<form action="{{ route('upload.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    <label for="file">Upload PDF</label>
+    <input type="file" name="file" id="file" accept="application/pdf" required>
+    <button type="submit">Upload</button>
+</form>
 
     <script>
         document.getElementById('fileInput').addEventListener('change', function (e) {

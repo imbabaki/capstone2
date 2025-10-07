@@ -1,0 +1,7 @@
+first to run in terminal 
+
+source ~/venv_bluetooth/bin/activate
+
+second to run in terminal 
+
+python3 bluetooth_flask_instaprint.py

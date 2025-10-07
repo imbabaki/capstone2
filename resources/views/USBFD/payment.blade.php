@@ -1,153 +1,96 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Payment - USB Printing</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background: #f5f5f5;
-            text-align: center;
-        }
-
-        .container {
-            display: inline-block;
-            background: white;
-            padding: 30px;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 50px;
-            max-width: 500px;
-            width: 100%;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .amount {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #28a745;
-            margin: 20px 0;
-        }
-
-        .inserted {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 15px;
-        }
-
-        .timer {
-            font-size: 1.2rem;
-            margin-top: 20px;
-            color: #dc3545;
-        }
-
-        form {
-            margin-top: 30px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        .coin-button {
-            margin: 5px;
-            padding: 10px 15px;
-            background-color: #ffc107;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .coin-button:hover {
-            background-color: #e0a800;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Please Insert Coins</h1>
-
-    <p>Total Amount: ₱{{ number_format($calculated_total ?? 0, 2) }}</p>
-
-    <p>Inserted Amount</p>
-    <div class="inserted">₱<span id="insertedAmount">0.00</span></div>
-
-    <div class="timer">
-        Time remaining: <span id="countdown">120</span> seconds
+<div class="container my-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+      <h3 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i> Review & Pay</h3>
+      <span class="badge bg-light text-dark px-3 py-2">Instaprint</span>
     </div>
 
-    <div>
-        <button class="coin-button" onclick="addCoin(1)">₱1</button>
-        <button class="coin-button" onclick="addCoin(5)">₱5</button>
-        <button class="coin-button" onclick="addCoin(10)">₱10</button>
-    </div>
+    <div class="card-body">
+      <!-- Order Details -->
+      <h5 class="mb-3 text-secondary">📝 Order Summary</h5>
+      <ul class="list-group mb-4 shadow-sm">
+        <li class="list-group-item"><strong>File:</strong> {{ $order['file_name'] }}</li>
+        <li class="list-group-item"><strong>Copies:</strong> {{ $order['copies'] }}</li>
+        <li class="list-group-item"><strong>Pages:</strong> {{ $order['pages'] ?: 'All' }}</li>
+        <li class="list-group-item"><strong>Color:</strong> {{ ucfirst($order['color']) }}</li>
+        <li class="list-group-item"><strong>Paper:</strong> {{ $order['paper_size'] }}</li>
+        <li class="list-group-item"><strong>Duplex:</strong> {{ $order['duplex'] }}</li>
+      </ul>
 
-    <form id="paymentForm" action="{{ route('usb.instructions') }}" method="GET" style="display: none;">
+      <!-- Payment Status -->
+      <h5 class="mb-3 text-secondary">💳 Payment Status</h5>
+      <div class="mb-3">
+        <p class="mb-1"><strong>Total Due:</strong> 
+          <span class="text-danger fs-5">₱{{ number_format($order['total'], 2) }}</span>
+        </p>
+        <p class="mb-1"><strong>Inserted:</strong> 
+          <span id="coinTotal" class="text-success fs-5">₱{{ number_format($coinTotal, 2) }}</span>
+        </p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress mb-3" style="height: 25px;">
+        <div id="payment-progress" 
+             class="progress-bar bg-success fw-bold" 
+             role="progressbar" 
+             style="width: 0%;" 
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          0%
+        </div>
+      </div>
+
+      <!-- Remaining Message -->
+      <div id="remaining-msg" class="alert alert-warning text-center fw-bold">
+        💰 Please insert ₱{{ number_format($order['total'] - $coinTotal, 2) }} more.
+      </div>
+
+      <!-- Payment Button -->
+      <form id="payment-form" method="POST" 
+            action="{{ route('usbfd.payment.handle') }}" 
+            style="{{ $coinTotal >= $order['total'] ? '' : 'display:none;' }}">
         @csrf
-        <input type="hidden" name="file" value="{{ $file }}">
-        <input type="hidden" name="copies" value="{{ $copies }}">
-        <input type="hidden" name="pages" value="{{ $pages }}">
-        <input type="hidden" name="color" value="{{ $color }}">
-        <input type="hidden" name="calculated_total" value="{{ $calculated_total }}">
-        <input type="hidden" name="amount_paid" id="amountPaid" value="0">
-        <button type="submit">Proceed</button>
-    </form>
+        <button type="submit" class="btn btn-lg btn-success w-100 shadow-sm">
+          ✅ Confirm Payment
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 
+<!-- Live Coin Update -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    let inserted = 0;
-    let total = parseFloat(@json($calculated_total ?? 0));
+const required = {{ $order['total'] }};
+const evtSource = new EventSource("http://192.168.0.101:5000/coin/stream");
 
-    const insertedAmountEl = document.getElementById('insertedAmount');
-    const paymentForm = document.getElementById('paymentForm');
-    const amountPaidInput = document.getElementById('amountPaid');
+evtSource.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    let total = parseFloat(data.total || 0);
 
-    function addCoin(amount) {
-        inserted += amount;
-        insertedAmountEl.textContent = inserted.toFixed(2);
-        amountPaidInput.value = inserted.toFixed(2);
+    // Update text
+    document.getElementById("coinTotal").innerText = "₱" + total.toFixed(2);
 
-        if (inserted >= total) {
-            paymentForm.style.display = 'block';
-        }
+    // Update progress bar
+    const progress = Math.min((total / required) * 100, 100);
+    const progressBar = document.getElementById("payment-progress");
+    progressBar.style.width = progress + "%";
+    progressBar.innerText = Math.floor(progress) + "%";
+    progressBar.setAttribute("aria-valuenow", progress);
+
+    // Toggle UI
+    const remainingMsg = document.getElementById("remaining-msg");
+    const paymentForm = document.getElementById("payment-form");
+
+    if (total >= required) {
+        remainingMsg.style.display = "none";
+        paymentForm.style.display = "block";
+    } else {
+        remainingMsg.innerText = `💰 Please insert ₱${(required - total).toFixed(2)} more.`;
+        remainingMsg.style.display = "block";
+        paymentForm.style.display = "none";
     }
+};
 
-    // Expose addCoin globally (so buttons can call it)
-    window.addCoin = addCoin;
-
-    // Countdown timer (2 minutes)
-    let timeLeft = 120;
-    const countdownEl = document.getElementById('countdown');
-
-    const timer = setInterval(() => {
-        timeLeft--;
-        countdownEl.textContent = timeLeft;
-
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            alert("Time expired. Returning to selection page.");
-            window.location.href = "{{ route('start') }}";
-        }
-    }, 1000);
-});
+evtSource.onerror = function(err) {
+    console.error("❌ SSE error:", err);
+};
 </script>
-
-
-</body>
-</html>

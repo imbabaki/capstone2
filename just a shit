@@ -1,0 +1,232 @@
+what i want is to open the bluetooth of the raspi 4 model b and the phone will connect to send the pdf file of what they want to be print 
+
+
+this is my routes/web.php
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BluetoothController;
+use App\Http\Controllers\USBController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Admin\PrintSettingController;
+use App\Http\Controllers\OptionsController;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Http;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+
+// Start screen
+Route::get('/', function () {
+    return view('start');
+})->name('start');
+
+// Options
+Route::get('/options', [OptionsController::class, 'index'])->name('options');
+
+// QR Code
+Route::get('/qr-code', [QRCodeController::class, 'show'])->name('qr.code');
+
+// Upload routes
+
+Route::get('/upload', function () {
+    return redirect()->route('upload.form');
+});
+
+Route::get('/upload/form', [FileUploadController::class, 'showForm'])->name('upload.form');
+Route::post('/upload/form', [FileUploadController::class, 'store'])->name('upload.store');
+
+// Edit settings
+Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
+
+// Payment summary (GET only)
+Route::post('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
+
+// Instructions page (GET only)
+Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
+
+// Print (POST only)
+Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
+
+// ✅ Check if a file has been uploaded (for kiosk auto-redirect)
+Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
+
+
+
+
+// Bluetooth functionality
+
+
+Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth.index');
+Route::post('/bluetooth/enable', [BluetoothController::class, 'enable'])->name('bluetooth.enable');
+Route::get('/bluetooth/print/{filename}', [BluetoothController::class, 'print'])->name('bluetooth.print');
+
+
+// USB Flash Drive flow
+Route::get('/USBFD', [USBController::class, 'index'])->name('usbfd.index');
+Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('usbfd.preview');
+Route::post('/USBFD/review', [USBController::class, 'review'])->name('usbfd.review');
+Route::post('/usbfd/process', [USBController::class, 'processPayment'])->name('usbfd.process');
+Route::post('/usbfd/payment', [USBController::class, 'handlePayment'])->name('usbfd.payment.handle');
+Route::get('/usbfd/instruction', [USBController::class, 'instruction'])->name('usbfd.instruction');
+Route::post('/usb/print', [USBController::class, 'doFinalPrint'])->name('usb.print');
+Route::get('/USBFD/success', [USBController::class, 'success'])->name('usb.success');
+Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])->name('USBFD.processPayment');
+Route::get('/usbfd/preview/{filepath}', [USBController::class, 'preview'])
+    ->where('filepath', '.*')
+    ->name('USBFD.preview');
+//  Coins Slot
+
+
+Route::get('/coin/total', function () {
+    try {
+        $response = Http::timeout(2)->get('http://192.168.0.101:5000/coin/total');
+        return response()->json(['total' => $response->json('total') ?? 0]);
+    } catch (\Exception $e) {
+        return response()->json(['total' => 0]);
+    }
+});
+
+
+
+
+// Admin Pricing
+Route::resource('admin/print-settings', PrintSettingController::class);
+Route::get('/admin/print-settings', [PrintSettingController::class, 'index'])->name('admin.print-settings.index');
+
+// Realtime USB Flash drive detection
+Route::get('/usb-check', function () {
+    $user = trim(shell_exec('whoami'));
+    $possiblePaths = ["/media/$user", "/media/usb", "/mnt/usb"];
+
+    $mountedUSBs = collect($possiblePaths)
+        ->filter(fn($path) => File::exists($path))
+        ->flatMap(fn($path) => File::directories($path))
+        ->values();
+
+    if ($mountedUSBs->isEmpty()) {
+        return response()->json(['count' => 0]);
+    }
+
+    $usbPath = $mountedUSBs->first();
+    $files = collect(File::files($usbPath))
+        ->filter(fn($file) => strtolower($file->getExtension()) === 'pdf');
+
+    return response()->json(['count' => $files->count()]);
+});
+
+and this is my bluetoothcontroller.php 
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class BluetoothController extends Controller
+{
+    public function index()
+    {
+        $path = "/home/instaprint/bluetooth_uploads";
+        $files = \File::exists($path)
+            ? collect(\File::files($path))->map(fn($file) => $file->getFilename())
+            : collect([]);
+
+        return view('bluetooth.index', ['files' => $files]);
+    }
+
+    public function enable()
+    {
+        // Make Bluetooth discoverable + pairable for 5 minutes
+        shell_exec('echo -e "power on\ndiscoverable on\npairable on\ntimeout discoverable 0\n" | sudo bluetoothctl');
+
+        return back()->with('success', 'Bluetooth is now discoverable! Pair from your phone.');
+    }
+
+    public function print($filename)
+    {
+        $filePath = "/home/instaprint/bluetooth_uploads/" . $filename;
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        shell_exec("lp " . escapeshellarg($filePath));
+
+        return back()->with('success', "Printing: $filename");
+    }
+}
+
+
+
+and this is my resources/bluetooth/index.blade.php 
+
+
+<div class="container">
+    <h2>Bluetooth Received Files</h2>
+
+    <form action="{{ route('bluetooth.enable') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-success mb-3">
+            Enable Bluetooth Pairing
+        </button>
+    </form>
+
+    <div id="progress-area"></div>
+
+    <ul id="file-list">
+        @foreach($files as $file)
+            <li>
+                {{ $file }}
+                <a href="{{ route('bluetooth.print', $file) }}" class="btn btn-primary btn-sm">Print</a>
+            </li>
+        @endforeach
+    </ul>
+</div>
+
+
+@push('scripts')
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const socket = io("http://127.0.0.1:5000"); // Flask runs here
+
+    socket.on("progress", (data) => {
+        let bar = document.getElementById("progress-" + data.filename);
+        if (!bar) {
+            document.getElementById("progress-area").innerHTML += `
+                <div class="mb-2">
+                    <strong>${data.filename}</strong>
+                    <div class="progress">
+                        <div id="progress-${data.filename}" class="progress-bar" 
+                            role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                </div>`;
+            bar = document.getElementById("progress-" + data.filename);
+        }
+        bar.style.width = data.percent + "%";
+        bar.innerText = data.percent + "%";
+    });
+
+    socket.on("new_file", (data) => {
+        document.getElementById("file-list").innerHTML += `
+            <li>
+                ${data.filename}
+                <a href="/bluetooth/print/${data.filename}" class="btn btn-primary btn-sm">Print</a>
+            </li>`;
+    });
+</script>
+
+
+
+i want you to review and guide me on how to do it step by step and after the send file from the bluetooth i want also to automatically redirect also the from the page bluetooth to the upload/edit page so that it will continue with the file that has been uploaded. 
+

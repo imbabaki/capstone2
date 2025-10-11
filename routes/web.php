@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\PrintSettingController;
 use App\Http\Controllers\OptionsController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Response;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -64,6 +64,9 @@ Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name(
 Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth.index');
 Route::post('/bluetooth/enable', [BluetoothController::class, 'enable'])->name('bluetooth.enable');
 Route::get('/bluetooth/print/{filename}', [BluetoothController::class, 'print'])->name('bluetooth.print');
+
+// This route handles Flask redirect and automatically prints
+Route::get('/bluetooth/edit/{filename}', [BluetoothController::class, 'handleUploadRedirect'])->name('bluetooth.edit');
 
 
 // USB Flash Drive flow
@@ -117,4 +120,14 @@ Route::get('/usb-check', function () {
         ->filter(fn($file) => strtolower($file->getExtension()) === 'pdf');
 
     return response()->json(['count' => $files->count()]);
+});
+
+Route::get('/upload/edit/{filename}', function ($filename) {
+    $path = storage_path("app/public/uploads/$filename");
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return Response::file($path);
 });

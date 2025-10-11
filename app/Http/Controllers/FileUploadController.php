@@ -25,19 +25,35 @@ class FileUploadController extends Controller
 
         $file = $request->file('file');
         $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('uploads'), $filename);
 
-        // ✅ Save latest upload for kiosk polling
+        // Use public/storage/uploads
+        $uploadPath = public_path('storage/uploads');
+
+        if (!File::exists($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        if (!is_writable($uploadPath)) {
+            return back()->withErrors(['file' => 'Uploads folder is not writable. Check permissions.']);
+        }
+
+        try {
+            $file->move($uploadPath, $filename);
+        } catch (\Exception $e) {
+            Log::error('File upload failed', ['error' => $e->getMessage()]);
+            return back()->withErrors(['file' => 'Failed to save the file. Check permissions.']);
+        }
+
+        // Save latest upload for kiosk polling
         $latestPath = storage_path('app/latest_upload.json');
         file_put_contents($latestPath, json_encode([
             'filename'  => $filename,
             'timestamp' => now()->toDateTimeString(),
         ]));
 
-        // 🔔 Broadcast event to WebSocket listeners
+        // Broadcast event
         event(new FileUploaded($filename));
 
-        // Phone: show success page
         return response()->view('upload_success', [
             'filename' => $filename
         ]);
@@ -46,7 +62,7 @@ class FileUploadController extends Controller
     // Show edit page (kiosk after auto-redirect)
     public function edit($filename)
     {
-        $fileUrl = asset('uploads/' . $filename);
+        $fileUrl = asset('storage/uploads/' . $filename);
         $pricing = PrintSetting::all();
         $order   = session('usb.order', []);
 
@@ -62,7 +78,7 @@ class FileUploadController extends Controller
             return back()->with('error', 'No order in session.');
         }
 
-        $filePath = public_path('uploads/' . $order['file_name']);
+        $filePath = public_path('storage/uploads/' . $order['file_name']);
 
         if (!File::exists($filePath)) {
             Log::error('Print failed: File not found', ['path' => $filePath]);
@@ -117,18 +133,18 @@ class FileUploadController extends Controller
     }
 
     // Payment summary
-public function paymentPage(Request $request)
-{
-    // Store order in session
-    session(['usb.order' => $request->all()]);
+    public function paymentPage(Request $request)
+    {
+        // Store order in session
+        session(['usb.order' => $request->all()]);
 
-    $order['color'] = $order['color'] ?? $order['color_option'] ?? null;
-    
-    return view('upload.payment', [
-        'order' => $request->all()
-    ]);
-}
+        $order = session('usb.order');
+        $order['color'] = $order['color'] ?? $order['color_option'] ?? null;
 
+        return view('upload.payment', [
+            'order' => $order
+        ]);
+    }
 
     // Instructions
     public function instruction()
@@ -141,7 +157,7 @@ public function paymentPage(Request $request)
         return view('upload.instructions', compact('order'));
     }
 
-    // ✅ New: kiosk polling to check upload
+    // Kiosk polling
     public function checkUpload()
     {
         $latestPath = storage_path('app/latest_upload.json');
@@ -152,11 +168,8 @@ public function paymentPage(Request $request)
 
         $data = json_decode(file_get_contents($latestPath), true);
 
-        // Clear file after sending (so kiosk won’t loop forever)
         if (!empty($data['filename'])) {
             $filename = $data['filename'];
-
-            // Reset JSON so next poll waits for new upload
             file_put_contents($latestPath, json_encode(['filename' => null]));
 
             return response()->json([
@@ -166,5 +179,50 @@ public function paymentPage(Request $request)
         }
 
         return response()->json(['filename' => null]);
+    }
+
+    public function storeBluetooth(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:pdf,jpg,png|max:10240', // max 10MB
+        ]);
+
+        $file = $request->file('file');
+        $filename = time() . '_' . $file->getClientOriginalName();
+
+        // ✅ Save to public/storage/uploads
+        $uploadPath = public_path('storage/uploads');
+
+        if (!File::exists($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        if (!is_writable($uploadPath)) {
+            return response()->json(['error' => 'Uploads folder not writable'], 500);
+        }
+
+        try {
+            $file->move($uploadPath, $filename);
+        } catch (\Exception $e) {
+            Log::error('Bluetooth file upload failed', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to save file'], 500);
+        }
+
+        // ✅ Save latest upload for Flask / kiosk polling
+        $latestPath = storage_path('app/latest_upload.json');
+        file_put_contents($latestPath, json_encode([
+            'filename'  => $filename,
+            'timestamp' => now()->toDateTimeString(),
+        ]));
+
+        // ✅ Broadcast event for WebSocket
+        event(new FileUploaded($filename));
+
+        // Return JSON for success
+        return response()->json([
+            'success'  => true,
+            'filename' => $filename,
+            'url'      => asset('storage/uploads/' . $filename)
+        ]);
     }
 }

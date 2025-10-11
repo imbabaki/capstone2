@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::VrLzgiVklc2Jc4fL',
+            '_route' => 'generated::xZnGR0KIqfarCxUF',
           ),
           1 => NULL,
           2 => 
@@ -93,7 +93,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::YxdrIk0eaPBhSFFI',
+            '_route' => 'generated::FycmhsjxSqI5Nkoy',
           ),
           1 => NULL,
           2 => 
@@ -441,7 +441,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::eoek2ePrZ4G6Hhq2',
+            '_route' => 'generated::BGtO9irgkjiZKvMk',
           ),
           1 => NULL,
           2 => 
@@ -517,7 +517,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::6qIAK8hhperVR5nV',
+            '_route' => 'generated::OqQtoOUUCYJk4Q3t',
           ),
           1 => NULL,
           2 => 
@@ -534,7 +534,7 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/bluetooth/print/([^/]++)(*:88)|/admin/print\\-settings/([^/]++)(?|(*:129)|/edit(*:142)|(*:150))|/storage/(.*)(*:172))/?$}sDu',
+      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/bluetooth/(?|print/([^/]++)(*:91)|edit/([^/]++)(*:111))|/admin/print\\-settings/([^/]++)(?|(*:154)|/edit(*:167)|(*:175))|/storage/(.*)(*:197))/?$}sDu',
     ),
     3 => 
     array (
@@ -584,7 +584,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      88 => 
+      91 => 
       array (
         0 => 
         array (
@@ -607,7 +607,30 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      129 => 
+      111 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'bluetooth.edit',
+          ),
+          1 => 
+          array (
+            0 => 'filename',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      154 => 
       array (
         0 => 
         array (
@@ -630,7 +653,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      142 => 
+      167 => 
       array (
         0 => 
         array (
@@ -653,7 +676,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      150 => 
+      175 => 
       array (
         0 => 
         array (
@@ -695,7 +718,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      172 => 
+      197 => 
       array (
         0 => 
         array (
@@ -733,7 +756,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::VrLzgiVklc2Jc4fL' => 
+    'generated::xZnGR0KIqfarCxUF' => 
     array (
       'methods' => 
       array (
@@ -762,7 +785,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004ca0000000000000000";}}',
-        'as' => 'generated::VrLzgiVklc2Jc4fL',
+        'as' => 'generated::xZnGR0KIqfarCxUF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -890,7 +913,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::YxdrIk0eaPBhSFFI' => 
+    'generated::FycmhsjxSqI5Nkoy' => 
     array (
       'methods' => 
       array (
@@ -912,7 +935,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::YxdrIk0eaPBhSFFI',
+        'as' => 'generated::FycmhsjxSqI5Nkoy',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1294,6 +1317,43 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'bluetooth.edit' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'bluetooth/edit/{filename}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\BluetoothController@handleUploadRedirect',
+        'controller' => 'App\\Http\\Controllers\\BluetoothController@handleUploadRedirect',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'bluetooth.edit',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'usbfd.index' => 
     array (
       'methods' => 
@@ -1660,7 +1720,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::eoek2ePrZ4G6Hhq2' => 
+    'generated::BGtO9irgkjiZKvMk' => 
     array (
       'methods' => 
       array (
@@ -1681,13 +1741,13 @@ app('router')->setCompiledRoutes(
     } catch (\\Exception $e) {
         return \\response()->json([\'total\' => 0]);
     }
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ea0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004eb0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::eoek2ePrZ4G6Hhq2',
+        'as' => 'generated::BGtO9irgkjiZKvMk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1960,7 +2020,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::6qIAK8hhperVR5nV' => 
+    'generated::OqQtoOUUCYJk4Q3t' => 
     array (
       'methods' => 
       array (
@@ -1992,13 +2052,13 @@ app('router')->setCompiledRoutes(
         ->filter(fn($file) => \\strtolower($file->getExtension()) === \'pdf\');
 
     return \\response()->json([\'count\' => $files->count()]);
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ec0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ed0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::6qIAK8hhperVR5nV',
+        'as' => 'generated::OqQtoOUUCYJk4Q3t',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2030,7 +2090,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004ef0000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004f00000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

@@ -46,11 +46,12 @@
     <p class="success">{{ session('success') }}</p>
 @endif
 
-<form id="uploadForm" method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data">
+<form action="{{ route('upload.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <input type="file" name="file" required>
     <button type="submit">Upload</button>
 </form>
+
 
 <script>
     // Laravel Echo listener (already configured in echo.js)

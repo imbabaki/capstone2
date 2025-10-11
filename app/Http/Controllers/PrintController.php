@@ -2,50 +2,73 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PrintController extends Controller
 {
-    public function print(Request $request)
+     public function print(Request $request, $filename)
     {
-        $filename = $request->input('filename');
-        $paperSize = $request->input('paper_size');
-        $color = $request->input('color');
-        $copies = (int) $request->input('copies');
-
-        $filePath = storage_path('app/usb_files/' . $filename);
+        $filePath = "/home/instaprint/bluetooth_uploads/" . $filename;
 
         if (!file_exists($filePath)) {
             return back()->with('error', 'File not found.');
         }
 
-        // Build the command for printing
-        $options = [];
+        $printer = 'EPSON_L120_Series';
+        $copies  = (int)($request->input('copies', 1));
+        $pages   = trim($request->input('pages', '')); // empty = print all
+        $color   = $request->input('color_option', 'color');
+        $paper   = $request->input('paper_size');
+        $duplex  = $request->input('duplex', 'one-sided');
+        $fit     = $request->input('fit', 'none');
+
+        // Build CUPS command
+        $cmd = ['lp', '-d', $printer, '-n', (string) max(1, $copies)];
+
+        // ✅ Only add page-ranges if user specified
+        if (!empty($pages)) {
+            $cmd[] = '-o';
+            $cmd[] = 'page-ranges=' . $pages;
+        }
+
+        // Color option
+        $cmd[] = '-o';
+        $cmd[] = ($color === 'grayscale') ? 'ColorModel=Gray' : 'ColorModel=RGB';
 
         // Paper size
-        $options[] = '-o media=' . $paperSize;
-
-        // Color or Grayscale
-        if ($color === 'grayscale') {
-            $options[] = '-o ColorModel=Gray';
-        } else {
-            $options[] = '-o ColorModel=RGB';
+        if (!empty($paper)) {
+            $cmd[] = '-o';
+            $cmd[] = 'media=' . $paper;
         }
 
-        // Number of copies
-        $options[] = '-n ' . $copies;
-
-        $command = 'lp ' . implode(' ', $options) . ' "' . $filePath . '"';
-
-        // Execute the print command
-        exec($command, $output, $status);
-
-        if ($status === 0) {
-            return back()->with('success', 'Printing started successfully!');
-        } else {
-            return back()->with('error', 'Failed to print. Command: ' . $command);
+        // Duplex printing
+        if (in_array($duplex, ['one-sided','two-sided-long-edge','two-sided-short-edge'], true)) {
+            $cmd[] = '-o';
+            $cmd[] = 'sides=' . $duplex;
         }
+
+        // Fit to page
+        if ($fit === 'fit-to-page') {
+            $cmd[] = '-o';
+            $cmd[] = 'fit-to-page';
+        }
+
+        $cmd[] = $filePath;
+
+        // Escape arguments safely
+        $escaped = array_map('escapeshellarg', $cmd);
+        $final   = implode(' ', $escaped) . ' 2>&1';
+
+        Log::info('Bluetooth CUPS print', ['cmd' => $final]);
+
+        $output = shell_exec($final);
+
+        Log::info('CUPS output', ['output' => $output]);
+
+        return back()->with('success', "Printing all pages of: $filename | Output: " . $output);
     }
 }
 

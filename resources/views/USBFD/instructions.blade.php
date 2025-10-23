@@ -9,7 +9,7 @@
   <li>Duplex: {{ $order['duplex'] }}</li>
   <li>Total: ₱{{ number_format($order['total'], 2) }}</li>
 </ul>
-<form method="POST" action="{{ route('usb.print') }}">
+<form method="POST" action="{{ route('upload.print') }}">
   @csrf
   <button type="submit">🖨️ Start Printing</button>
 </form>+

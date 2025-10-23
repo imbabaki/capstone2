@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::xZnGR0KIqfarCxUF',
+            '_route' => 'generated::dTqKgr8VtlNnEZSF',
           ),
           1 => NULL,
           2 => 
@@ -93,7 +93,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::FycmhsjxSqI5Nkoy',
+            '_route' => 'generated::DPS6ikaUWfhXqBlG',
           ),
           1 => NULL,
           2 => 
@@ -221,6 +221,46 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/upload/success' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.success',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/upload/payments' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'upload.payments',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
       '/bluetooth' => 
       array (
         0 => 
@@ -280,26 +320,6 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/USBFD/preview' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'usbfd.preview',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
       '/USBFD/review' => 
       array (
         0 => 
@@ -319,13 +339,30 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usbfd/process' => 
+      '/usbfd/payment' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'usbfd.process',
+            '_route' => 'usbfd.payment',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'usbfd.payment.handle',
           ),
           1 => NULL,
           2 => 
@@ -338,13 +375,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usbfd/payment' => 
+      '/usbfd/process-payment' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'usbfd.payment.handle',
+            '_route' => 'usbfd.process-payment',
           ),
           1 => NULL,
           2 => 
@@ -416,18 +453,19 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/usbfd/process-payment' => 
+      '/usb/status' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'USBFD.processPayment',
+            '_route' => 'usb.status',
           ),
           1 => NULL,
           2 => 
           array (
-            'POST' => 0,
+            'GET' => 0,
+            'HEAD' => 1,
           ),
           3 => NULL,
           4 => false,
@@ -441,7 +479,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::BGtO9irgkjiZKvMk',
+            '_route' => 'generated::QO3zqE641EMVV4WW',
           ),
           1 => NULL,
           2 => 
@@ -517,7 +555,27 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::OqQtoOUUCYJk4Q3t',
+            '_route' => 'generated::NJSVXTVbnDGz4Vua',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/trigger-dispenser' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'generated::aNYwxCOzIkXotfbx',
           ),
           1 => NULL,
           2 => 
@@ -534,11 +592,11 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/u(?|pload/edit/([^/]++)(*:31)|sbfd/preview/(.*)(*:55))|/bluetooth/(?|print/([^/]++)(*:91)|edit/([^/]++)(*:111))|/admin/print\\-settings/([^/]++)(?|(*:154)|/edit(*:167)|(*:175))|/storage/(.*)(*:197))/?$}sDu',
+      0 => '{^(?|/upload/edit/([^/]++)(*:28)|/bluetooth/(?|print/([^/]++)(*:63)|edit/([^/]++)(*:83))|/USBFD/preview/(.*)(*:110)|/admin/print\\-settings/([^/]++)(?|(*:152)|/edit(*:165)|(*:173))|/storage/(.*)(*:195))/?$}sDu',
     ),
     3 => 
     array (
-      31 => 
+      28 => 
       array (
         0 => 
         array (
@@ -561,30 +619,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      55 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'USBFD.preview',
-          ),
-          1 => 
-          array (
-            0 => 'filepath',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      91 => 
+      63 => 
       array (
         0 => 
         array (
@@ -607,7 +642,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      111 => 
+      83 => 
       array (
         0 => 
         array (
@@ -630,7 +665,30 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      154 => 
+      110 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'USBFD.preview',
+          ),
+          1 => 
+          array (
+            0 => 'filepath',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      152 => 
       array (
         0 => 
         array (
@@ -653,7 +711,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      167 => 
+      165 => 
       array (
         0 => 
         array (
@@ -676,7 +734,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      175 => 
+      173 => 
       array (
         0 => 
         array (
@@ -718,7 +776,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      197 => 
+      195 => 
       array (
         0 => 
         array (
@@ -756,7 +814,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::xZnGR0KIqfarCxUF' => 
+    'generated::dTqKgr8VtlNnEZSF' => 
     array (
       'methods' => 
       array (
@@ -785,7 +843,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000004ca0000000000000000";}}',
-        'as' => 'generated::xZnGR0KIqfarCxUF',
+        'as' => 'generated::dTqKgr8VtlNnEZSF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -913,7 +971,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::FycmhsjxSqI5Nkoy' => 
+    'generated::DPS6ikaUWfhXqBlG' => 
     array (
       'methods' => 
       array (
@@ -935,7 +993,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::FycmhsjxSqI5Nkoy',
+        'as' => 'generated::DPS6ikaUWfhXqBlG',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1207,6 +1265,80 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'upload.success' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/success',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@success',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@success',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.success',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'upload.payments' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'upload/payments',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\FileUploadController@handlePayment',
+        'controller' => 'App\\Http\\Controllers\\FileUploadController@handlePayment',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'upload.payments',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'bluetooth.index' => 
     array (
       'methods' => 
@@ -1391,43 +1523,6 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'usbfd.preview' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'USBFD/preview',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@preview',
-        'controller' => 'App\\Http\\Controllers\\USBController@preview',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'usbfd.preview',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
     'usbfd.review' => 
     array (
       'methods' => 
@@ -1464,13 +1559,50 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'usbfd.process' => 
+    'usbfd.payment' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'usbfd/payment',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@paymentPage',
+        'controller' => 'App\\Http\\Controllers\\USBController@paymentPage',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usbfd.payment',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'usbfd.process-payment' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'usbfd/process',
+      'uri' => 'usbfd/process-payment',
       'action' => 
       array (
         'middleware' => 
@@ -1484,7 +1616,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'usbfd.process',
+        'as' => 'usbfd.process-payment',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1646,42 +1778,6 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'USBFD.processPayment' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'usbfd/process-payment',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-        ),
-        'uses' => 'App\\Http\\Controllers\\USBController@processPayment',
-        'controller' => 'App\\Http\\Controllers\\USBController@processPayment',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'USBFD.processPayment',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
     'USBFD.preview' => 
     array (
       'methods' => 
@@ -1689,7 +1785,7 @@ app('router')->setCompiledRoutes(
         0 => 'GET',
         1 => 'HEAD',
       ),
-      'uri' => 'usbfd/preview/{filepath}',
+      'uri' => 'USBFD/preview/{filepath}',
       'action' => 
       array (
         'middleware' => 
@@ -1720,7 +1816,44 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::BGtO9irgkjiZKvMk' => 
+    'usb.status' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'usb/status',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'App\\Http\\Controllers\\USBController@status',
+        'controller' => 'App\\Http\\Controllers\\USBController@status',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'usb.status',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'generated::QO3zqE641EMVV4WW' => 
     array (
       'methods' => 
       array (
@@ -1741,13 +1874,13 @@ app('router')->setCompiledRoutes(
     } catch (\\Exception $e) {
         return \\response()->json([\'total\' => 0]);
     }
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004eb0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ed0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::BGtO9irgkjiZKvMk',
+        'as' => 'generated::QO3zqE641EMVV4WW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2020,7 +2153,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OqQtoOUUCYJk4Q3t' => 
+    'generated::NJSVXTVbnDGz4Vua' => 
     array (
       'methods' => 
       array (
@@ -2052,13 +2185,82 @@ app('router')->setCompiledRoutes(
         ->filter(fn($file) => \\strtolower($file->getExtension()) === \'pdf\');
 
     return \\response()->json([\'count\' => $files->count()]);
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ed0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004ef0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
         array (
         ),
-        'as' => 'generated::OqQtoOUUCYJk4Q3t',
+        'as' => 'generated::NJSVXTVbnDGz4Vua',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'generated::aNYwxCOzIkXotfbx' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'trigger-dispenser',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:1207:"function() {
+    $order = \\session(\'order\'); // Retrieve saved order (you probably already store this)
+    if (!$order) return \\response()->json([\'error\' => \'No order found\'], 400);
+
+    // Calculate total papers (copies × pages)
+    $copies = \\intval($order[\'copies\'] ?? 1);
+    $pages = $order[\'pages\'] ?? \'1\';
+    $paperSize = $order[\'paper_size\'] ?? \'A4\';
+
+    // Convert page ranges to count
+    $pageCount = 0;
+    foreach (\\explode(\',\', $pages) as $part) {
+        $part = \\trim($part);
+        if (\\strpos($part, \'-\') !== false) {
+            [$start, $end] = \\explode(\'-\', $part);
+            $pageCount += (\\intval($end) - \\intval($start) + 1);
+        } else {
+            $pageCount += 1;
+        }
+    }
+
+    $totalPapers = $copies * $pageCount;
+
+    // Send trigger to Raspberry Pi Dispenser API (Flask or local Python)
+    try {
+        \\Illuminate\\Support\\Facades\\Http::post(\'http://194.168.4.1:5005/start\', [
+            \'paper_size\' => $paperSize,
+            \'count\' => $totalPapers
+        ]);
+        return \\response()->json([\'message\' => \'Dispenser triggered successfully\']);
+    } catch (\\Exception $e) {
+        return \\response()->json([\'error\' => $e->getMessage()], 500);
+    }
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004f20000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'generated::aNYwxCOzIkXotfbx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2090,7 +2292,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004f00000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004f40000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

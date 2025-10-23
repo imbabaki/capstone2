@@ -54,8 +54,8 @@ Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->nam
 
 // ✅ Check if a file has been uploaded (for kiosk auto-redirect)
 Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
-
-
+Route::get('/upload/success', [FileUploadController::class, 'success'])->name('upload.success');
+Route::get('/upload/payments', [FileUploadController::class, 'handlePayment'])->name('upload.payments');
 
 
 // Bluetooth functionality
@@ -71,17 +71,18 @@ Route::get('/bluetooth/edit/{filename}', [BluetoothController::class, 'handleUpl
 
 // USB Flash Drive flow
 Route::get('/USBFD', [USBController::class, 'index'])->name('usbfd.index');
-Route::get('/USBFD/preview', [USBController::class, 'preview'])->name('usbfd.preview');
 Route::post('/USBFD/review', [USBController::class, 'review'])->name('usbfd.review');
-Route::post('/usbfd/process', [USBController::class, 'processPayment'])->name('usbfd.process');
+Route::get('/usbfd/payment', [USBController::class, 'paymentPage'])->name('usbfd.payment');
+Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])->name('usbfd.process-payment');
 Route::post('/usbfd/payment', [USBController::class, 'handlePayment'])->name('usbfd.payment.handle');
 Route::get('/usbfd/instruction', [USBController::class, 'instruction'])->name('usbfd.instruction');
 Route::post('/usb/print', [USBController::class, 'doFinalPrint'])->name('usb.print');
 Route::get('/USBFD/success', [USBController::class, 'success'])->name('usb.success');
-Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])->name('USBFD.processPayment');
-Route::get('/usbfd/preview/{filepath}', [USBController::class, 'preview'])
+Route::get('/USBFD/preview/{filepath}', [USBController::class, 'preview'])
     ->where('filepath', '.*')
     ->name('USBFD.preview');
+Route::get('/usb/status', [App\Http\Controllers\USBController::class, 'status'])->name('usb.status');
+
 //  Coins Slot
 
 
@@ -122,12 +123,37 @@ Route::get('/usb-check', function () {
     return response()->json(['count' => $files->count()]);
 });
 
-Route::get('/upload/edit/{filename}', function ($filename) {
-    $path = storage_path("app/public/uploads/$filename");
+Route::get('/trigger-dispenser', function() {
+    $order = session('order'); // Retrieve saved order (you probably already store this)
+    if (!$order) return response()->json(['error' => 'No order found'], 400);
 
-    if (!file_exists($path)) {
-        abort(404);
+    // Calculate total papers (copies × pages)
+    $copies = intval($order['copies'] ?? 1);
+    $pages = $order['pages'] ?? '1';
+    $paperSize = $order['paper_size'] ?? 'A4';
+
+    // Convert page ranges to count
+    $pageCount = 0;
+    foreach (explode(',', $pages) as $part) {
+        $part = trim($part);
+        if (strpos($part, '-') !== false) {
+            [$start, $end] = explode('-', $part);
+            $pageCount += (intval($end) - intval($start) + 1);
+        } else {
+            $pageCount += 1;
+        }
     }
 
-    return Response::file($path);
+    $totalPapers = $copies * $pageCount;
+
+    // Send trigger to Raspberry Pi Dispenser API (Flask or local Python)
+    try {
+        Http::post('http://194.168.4.1:5005/start', [
+            'paper_size' => $paperSize,
+            'count' => $totalPapers
+        ]);
+        return response()->json(['message' => 'Dispenser triggered successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 });

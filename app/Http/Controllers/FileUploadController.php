@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use App\Models\PrintSetting;
 use App\Events\FileUploaded;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+
+
 
 class FileUploadController extends Controller
 {
@@ -62,12 +66,24 @@ class FileUploadController extends Controller
     // Show edit page (kiosk after auto-redirect)
     public function edit($filename)
     {
-        $fileUrl = asset('storage/uploads/' . $filename);
-        $pricing = PrintSetting::all();
-        $order   = session('usb.order', []);
+        $path = storage_path("app/public/uploads/$filename");
+        $fileUrl = asset("storage/uploads/$filename");
 
-        return view('edit_upload', compact('fileUrl', 'filename', 'pricing', 'order'));
+        // Get total pages (if it's a PDF)
+        $totalPages = 1;
+        if (Str::endsWith($filename, '.pdf')) {
+            $pdf = new \Smalot\PdfParser\Parser();
+            $document = $pdf->parseFile($path);
+            $totalPages = count($document->getPages());
+        }
+
+        $pricing = PrintSetting::all();
+        $order = session('order', []);
+
+        return view('edit_upload', compact('fileUrl', 'filename', 'pricing', 'order', 'totalPages'));
     }
+
+
 
     // Final print command
     public function doFinalPrint(Request $request)
@@ -129,7 +145,7 @@ class FileUploadController extends Controller
 
         Log::info('CUPS output', ['output' => $output]);
 
-        return redirect()->route('USBFD.success')->with('success', 'Print job sent: ' . $output);
+        return redirect()->route('upload.success')->with('success', 'Print job sent: ' . $output);
     }
 
     // Payment summary
@@ -140,6 +156,7 @@ class FileUploadController extends Controller
 
         $order = session('usb.order');
         $order['color'] = $order['color'] ?? $order['color_option'] ?? null;
+
 
         return view('upload.payment', [
             'order' => $order
@@ -225,4 +242,33 @@ class FileUploadController extends Controller
             'url'      => asset('storage/uploads/' . $filename)
         ]);
     }
+
+    public function handlePayment(Request $request)
+    {
+        $order = session('usb.order');
+        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No order found.');
+
+        $order['paid'] = true;
+        session(['usb.order' => $order]);
+
+        // ✅ Reset coin total on the Raspberry Pi
+        try {
+            Http::timeout(2)->post('http://127.168.0.101:5003/coin/reset');
+        } catch (\Exception $e) {
+            Log::warning("Failed to reset coin total: " . $e->getMessage());
+        }
+
+        return redirect()->route('upload.instructions');
+    }
+    
+        public function success()
+    {
+        // You can return a view
+        return view('upload.success');
+
+        // Or just return a simple response
+        // return response()->json(['message' => 'USB operation successful']);
+    }
+    
+   
 }

@@ -202,6 +202,7 @@ use Illuminate\Support\Str;
           <select id="paper_size" name="paper_size">
               <option value="A4" {{ ($order['paper_size'] ?? '')=='A4' ? 'selected' : '' }}>A4</option>
               <option value="Letter" {{ ($order['paper_size'] ?? '')=='Letter' ? 'selected' : '' }}>Letter</option>
+              <option value="Legal" {{ ($order['paper_size'] ?? '')=='Legal' ? 'selected' : '' }}>Legal</option>
           </select>
 
           <label for="duplex">Duplex</label>

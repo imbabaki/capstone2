@@ -110,7 +110,6 @@
             pages: "{{ $order['pages'] ?? '1' }}"
         };
 
-        // Replace with your Pi hotspot IP if using 192.168.4.1
         fetch("http://192.168.4.1:5005/start", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -119,8 +118,6 @@
         .then(res => res.json())
         .then(data => {
             console.log("✅ Dispenser triggered:", data);
-
-            // Redirect immediately while motor is running
             window.location.href = "{{ route('upload.payments') }}";
         })
         .catch(err => console.error("❌ Error triggering dispenser:", err));

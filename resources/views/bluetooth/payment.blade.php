@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Payment - Instaprint</title>
+  <title>Payment - Bluetooth Print</title>
   
-  {{-- ✅ LOCAL files - no internet needed --}}
   <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
   
   <style>
-    /* Touch scrolling */
     * {
       -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
@@ -44,6 +42,11 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+
+    #apply-voucher-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -52,7 +55,7 @@
   <div class="card shadow-lg border-0">
     <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
       <h3 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i> Review & Pay</h3>
-      <span class="badge bg-light text-dark px-3 py-2">Instaprint</span>
+      <span class="badge bg-light text-dark px-3 py-2">📱 Bluetooth</span>
     </div>
 
     <div class="card-body">
@@ -62,12 +65,12 @@
         <li class="list-group-item"><strong>File:</strong> {{ $order['file_name'] }}</li>
         <li class="list-group-item"><strong>Copies:</strong> {{ $order['copies'] }}</li>
         <li class="list-group-item"><strong>Pages:</strong> {{ $order['pages'] ?: 'All' }}</li>
-        <li class="list-group-item"><strong>Color:</strong> {{ ucfirst($order['color']) }}</li>
+        <li class="list-group-item"><strong>Color:</strong> {{ ucfirst($order['color_option']) }}</li>
         <li class="list-group-item"><strong>Paper:</strong> {{ $order['paper_size'] }}</li>
         <li class="list-group-item"><strong>Duplex:</strong> {{ $order['duplex'] }}</li>
       </ul>
 
-      {{-- ✅ Voucher Input Section --}}
+      {{-- Voucher Input Section --}}
       @if(empty($order['voucher_applied']))
       <div class="card mb-4 border-success shadow-sm">
         <div class="card-header bg-success text-white">
@@ -83,6 +86,7 @@
             >
             <button 
               type="button"
+              id="apply-voucher-btn"
               onclick="applyVoucher()"
               class="btn btn-success"
             >
@@ -118,7 +122,7 @@
         @endif
         <p class="mb-1">
           <strong>Total Due:</strong> 
-          <span class="text-danger fs-5">₱{{ number_format($order['total'], 2) }}</span>
+          <span class="text-danger fs-5">₱{{ number_format($order['calculated_total'], 2) }}</span>
         </p>
         <p class="mb-1">
           <strong>Inserted:</strong> 
@@ -139,16 +143,8 @@
 
       <!-- Remaining Message -->
       <div id="remaining-msg" class="alert alert-warning text-center fw-bold">
-        💰 Please insert ₱{{ number_format($order['total'], 2) }}.
+        💰 Please insert ₱{{ number_format($order['calculated_total'], 2) }}.
       </div>
-
-      <!-- Debug Message -->
-      <div id="debug-msg" class="alert alert-info" style="display:none;"></div>
-
-      <!-- Payment Form (Hidden, will be submitted via JS) -->
-      <form id="payment-form" method="POST" action="{{ route('usbfd.payment.handle') }}" style="display:none;">
-        @csrf
-      </form>
 
       <!-- Payment Button -->
       <button id="confirm-btn" type="button" class="btn btn-lg btn-success w-100 shadow-sm" style="display:none;">
@@ -158,50 +154,45 @@
   </div>
 </div>
 
-{{-- ✅ LOCAL Bootstrap JS --}}
 <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
 <script>
-console.log("🚀 Payment page loaded");
+console.log("🚀 Bluetooth payment page loaded");
 
-const required = {{ $order['total'] }};
+const required = {{ $order['calculated_total'] }};
 const evtSource = new EventSource("http://127.0.0.1:5003/coin/stream");
-const debugMsg = document.getElementById("debug-msg");
-
-function showDebug(message) {
-  console.log(message);
-  debugMsg.style.display = "block";
-  debugMsg.innerHTML = message;
-}
 
 // --- Update Function ---
 function updatePayment(total) {
   console.log("💰 Coin total updated:", total);
   
-  // Update inserted text
   const totalDisplay = document.getElementById("coinTotal");
-  totalDisplay.innerText = "₱" + total.toFixed(2);
+  if (totalDisplay) {
+    totalDisplay.innerText = "₱" + total.toFixed(2);
+  }
 
-  // Update progress bar
   const progress = Math.min((total / required) * 100, 100);
   const progressBar = document.getElementById("payment-progress");
-  progressBar.style.width = progress + "%";
-  progressBar.innerText = Math.floor(progress) + "%";
-  progressBar.setAttribute("aria-valuenow", progress);
+  if (progressBar) {
+    progressBar.style.width = progress + "%";
+    progressBar.innerText = Math.floor(progress) + "%";
+    progressBar.setAttribute("aria-valuenow", progress);
+  }
 
-  // Update remaining or confirm UI
   const remainingMsg = document.getElementById("remaining-msg");
   const confirmBtn = document.getElementById("confirm-btn");
 
   if (total >= required) {
     console.log("✅ Sufficient payment received");
-    remainingMsg.style.display = "none";
-    confirmBtn.style.display = "block";
+    if (remainingMsg) remainingMsg.style.display = "none";
+    if (confirmBtn) confirmBtn.style.display = "block";
   } else {
     const remaining = (required - total).toFixed(2);
-    remainingMsg.innerText = `💰 Please insert ₱${remaining} more.`;
-    remainingMsg.style.display = "block";
-    confirmBtn.style.display = "none";
+    if (remainingMsg) {
+      remainingMsg.innerText = `💰 Please insert ₱${remaining} more.`;
+      remainingMsg.style.display = "block";
+    }
+    if (confirmBtn) confirmBtn.style.display = "none";
   }
 }
 
@@ -226,112 +217,172 @@ evtSource.onerror = function(err) {
   }, 3000);
 };
 
-// --- ✅ Confirm Payment Button ---
-document.getElementById("confirm-btn").addEventListener("click", function() {
-  console.log("🔵 Confirm button clicked");
-  
-  const btn = this;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-  
-  showDebug("⏳ Triggering dispenser motor...");
+// --- Confirm Payment Button ---
+const confirmBtn = document.getElementById("confirm-btn");
+if (confirmBtn) {
+  confirmBtn.addEventListener("click", function() {
+    console.log("🔵 Confirm button clicked");
+    
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
 
-  // Prepare dispenser payload
-  const payload = {
-    paper_size: "{{ $order['paper_size'] }}",
-    copies: {{ $order['copies'] ?? 1 }},
-    pages: "{{ $order['pages'] ?? '' }}"
-  };
+    // Prepare dispenser payload
+    const payload = {
+      paper_size: "{{ $order['paper_size'] }}",
+      copies: {{ $order['copies'] ?? 1 }},
+      pages: "{{ $order['pages'] ?? '' }}"
+    };
 
-  console.log("📦 Dispenser payload:", payload);
+    console.log("📦 Dispenser payload:", payload);
 
-  // ✅ Trigger dispenser motor (with timeout)
-  const dispenserTimeout = setTimeout(() => {
-    console.warn("⏱️ Dispenser timeout - proceeding anyway");
-    submitPayment();
-  }, 5000); // 5 second timeout
+    // Trigger dispenser motor with timeout
+    const dispenserTimeout = setTimeout(() => {
+      console.warn("⏱️ Dispenser timeout - proceeding anyway");
+      processPayment();
+    }, 5000);
 
-  fetch("http://192.168.4.1:5005/start", {
+    fetch("http://192.168.4.1:5005/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(res => {
+      console.log("📡 Dispenser response status:", res.status);
+      clearTimeout(dispenserTimeout);
+      return res.json();
+    })
+    .then(data => {
+      console.log("✅ Dispenser triggered:", data);
+      processPayment();
+    })
+    .catch(err => {
+      console.error("❌ Dispenser error:", err);
+      clearTimeout(dispenserTimeout);
+      setTimeout(processPayment, 1000);
+    });
+  });
+}
+
+// Process payment via handlePayment endpoint
+function processPayment() {
+  console.log("📝 Processing payment via server");
+
+  fetch("{{ route('bluetooth.handlePayment') }}", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": "{{ csrf_token() }}",
+      "Accept": "application/json"
+    }
   })
   .then(res => {
-    console.log("📡 Dispenser response status:", res.status);
-    clearTimeout(dispenserTimeout);
+    if (!res.ok) {
+      return res.json().then(data => {
+        throw new Error(data.message || 'Payment failed');
+      });
+    }
+
     return res.json();
   })
   .then(data => {
-    console.log("✅ Dispenser triggered:", data);
-    showDebug("✅ Dispenser activated! Submitting payment...");
-    submitPayment();
+    if (data.success) {
+      console.log("✅ Payment processed successfully");
+
+      setTimeout(() => {
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          window.location.href = "{{ route('bluetooth.instruction') }}";
+        }
+      }, 1000);
+    } else {
+      console.error("❌ Payment failed:", data.message);
+      alert(data.message || 'Payment processing failed');
+      location.reload();
+    }
   })
   .catch(err => {
-    console.error("❌ Dispenser error:", err);
-    clearTimeout(dispenserTimeout);
-    showDebug("⚠️ Dispenser unavailable, but payment will continue...");
-    // Still submit payment even if dispenser fails
-    setTimeout(submitPayment, 1000);
-  });
-});
+    console.error("❌ Payment processing error:", err);
+    alert('Failed to process payment: ' + err.message);
 
-// ✅ Submit payment form
-function submitPayment() {
-  console.log("📝 Submitting payment form");
-  showDebug("📝 Submitting payment to server...");
-  
-  const form = document.getElementById('payment-form');
-  if (form) {
-    form.submit();
-  } else {
-    console.error("❌ Payment form not found!");
-    alert("Error: Payment form not found. Redirecting...");
-    window.location.href = "{{ route('usbfd.instruction') }}";
-  }
+    // Re-enable button on error
+    const btn = document.getElementById('confirm-btn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '✅ Confirm Payment';
+    }
+  });
 }
 
-// --- ✅ Voucher Application Function ---
+// --- Voucher Application Function ---
 async function applyVoucher() {
-  const code = document.getElementById('voucherCode').value.trim();
+  const voucherInput = document.getElementById('voucherCode');
   const msgEl = document.getElementById('voucherMessage');
+  const applyBtn = document.getElementById('apply-voucher-btn');
   
+  // Check if elements exist
+  if (!voucherInput || !msgEl || !applyBtn) {
+    console.log('Voucher elements not found - likely already applied');
+    return;
+  }
+  
+  const code = voucherInput.value.trim();
+
   if (!code) {
     msgEl.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Please enter a voucher code</div>';
     return;
   }
 
-  msgEl.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Checking voucher...</div>';
+  // Disable button and show loading
+  applyBtn.disabled = true;
+  applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Checking...';
+  msgEl.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Verifying voucher code...</div>';
+
+  const requestUrl = '/bluetooth/apply-voucher';
+  const requestData = {
+    code: code,
+    source: 'Bluetooth'
+  };
 
   try {
-    const response = await fetch('{{ route("voucher.apply") }}', {
+    const response = await fetch(requestUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        code: code,
-        source: 'USB'
-      })
+      body: JSON.stringify(requestData)
     });
 
     const data = await response.json();
 
     if (data.success) {
       msgEl.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>${data.message}</div>`;
-      setTimeout(() => location.reload(), 1500);
+      setTimeout(() => window.location.href = "{{ route('bluetooth.payment.view') }}", 1500);
     } else {
       msgEl.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>${data.message}</div>`;
+      applyBtn.disabled = false;
+      applyBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Apply';
     }
   } catch (error) {
+    console.error('Voucher application error:', error);
     msgEl.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Failed to apply voucher. Please try again.</div>';
-    console.error('Voucher error:', error);
+    applyBtn.disabled = false;
+    applyBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Apply';
   }
 }
 
-// ✅ Test button visibility on load (for debugging)
-console.log("Required amount:", required);
-console.log("Confirm button element:", document.getElementById("confirm-btn"));
+// Allow pressing Enter to apply voucher (only if input exists)
+const voucherInput = document.getElementById('voucherCode');
+if (voucherInput) {
+  voucherInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      applyVoucher();
+    }
+  });
+}
 </script>
 
 </body>

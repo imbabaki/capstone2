@@ -744,7 +744,7 @@
   ),
   'session' => 
   array (
-    'driver' => 'database',
+    'driver' => 'file',
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,

@@ -14,7 +14,7 @@ GPIO.setmode(GPIO.BCM)
 
 sensor_pin = 22  # IR Paper Sensor
 relay_pins = {
-    "A4": 25,
+    "A4": 5,
     "Letter": 24,
     "Legal": 16
 }

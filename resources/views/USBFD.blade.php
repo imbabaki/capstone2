@@ -9,7 +9,6 @@
   <title>USB Flash Drive Mode</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* (keep your styles) */
     html, body {
       width: 100%;
       height: 100%;
@@ -62,10 +61,9 @@
       <a href="{{ route('options') }}" class="back-button">← BACK</a>
     </div>
 
-    {{-- USB UI: when files exist. Initially hidden; will be filled by server or SSE --}}
+    {{-- USB UI: when files exist --}}
     <div id="usbUI" style="display:none;">
       <ul id="pdfList">
-        {{-- If server rendered some initial files, render them so users without SSE still see them --}}
         @if(!empty($pdfFiles) && count($pdfFiles) > 0)
           @foreach($pdfFiles as $file)
             <li data-path="{{ $file['path'] }}">
@@ -88,26 +86,30 @@
           <h3>Print Settings</h3>
           <form action="{{ route('usbfd.process-payment') }}" method="POST" id="printForm">
             @csrf
+            <!-- Hidden synced fields -->
             <input type="hidden" name="file" id="selectedFileName">
             <input type="hidden" name="file_path" id="selectedPDFPath">
-            <input type="hidden" name="total_pages" id="total_pages">
+            <input type="hidden" name="pages" id="hidden_pages">
+            <input type="hidden" name="copies" id="hidden_copies" value="1">
+            <input type="hidden" name="paper_size" id="hidden_paper_size" value="A4">
+            <input type="hidden" name="color" id="hidden_color" value="grayscale">
             <input type="hidden" name="total" id="calculated_total">
 
             <label for="paper_size">Paper Size</label>
-            <select name="paper_size" id="paper_size">
+            <select id="paper_size">
               <option value="A4">A4</option>
               <option value="Letter">Short</option>
               <option value="Legal">Long</option>
             </select>
 
             <label for="copies">Number of Copies</label>
-            <input type="number" name="copies" id="copies" value="1" min="1" required>
+            <input type="number" id="copies" value="1" min="1" required>
 
             <label for="pages">Pages to Print (e.g., 1,2,5-7)</label>
-            <input type="text" name="pages" id="pages" placeholder="Print all pages">
+            <input type="text" id="pages" placeholder="Print all pages">
 
             <label for="color_option">Color Mode</label>
-            <select name="color" id="color_option">
+            <select id="color_option">
               <option value="color">W/Color</option>
               <option value="grayscale">Black&White</option>
             </select>
@@ -137,7 +139,6 @@
   </div>
 
   <script>
-    // Pricing and DOM references (preserve calculation behavior)
     const prices = @json($pricing ?? []);
     const paperSize = document.getElementById('paper_size');
     const colorSel = document.getElementById('color_option');
@@ -147,27 +148,22 @@
     const hiddenTotal = document.getElementById('calculated_total');
     const fileNameH = document.getElementById('selectedFileName');
     const filePathH = document.getElementById('selectedPDFPath');
-    const totalPagesH = document.getElementById('total_pages');
     const pdfListEl = document.getElementById('pdfList');
     const defaultUI = document.getElementById('defaultUI');
     const usbUI = document.getElementById('usbUI');
     const pdfPreview = document.getElementById('pdfPreview');
 
-    // Helper: preview PDF and prepare form values
     function previewPDF(previewUrl, fileName, realPath, pdfPages = 1) {
-      if (pdfListEl) pdfListEl.style.display = 'none';
-      if (usbUI) usbUI.style.display = 'block';
-      if (pdfPreview) pdfPreview.style.display = 'flex';
+      pdfListEl.style.display = 'none';
+      usbUI.style.display = 'block';
+      pdfPreview.style.display = 'flex';
       document.getElementById('pdfViewer').src = previewUrl;
       fileNameH.value = fileName;
       filePathH.value = realPath;
-      totalPagesH.value = pdfPages;
       pagesEl.value = '';
-      pagesEl.placeholder = `Print all (${pdfPages} pages)`;
       calculateTotal(pdfPages);
     }
 
-    // page range parsing; empty => defaultPages
     function parsePageRange(range, defaultPages = 1) {
       if (!range || range.trim() === "") return defaultPages;
       let total = 0;
@@ -184,44 +180,40 @@
       return total;
     }
 
-    // Calculate price (keeps your existing logic)
-    function calculateTotal(defaultPages = null) {
+    function calculateTotal(defaultPages = 1) {
       const sizeKey = (paperSize?.value || '').toLowerCase();
       const colorKey = (colorSel?.value || '').toLowerCase();
       const pricePerPage = Number(prices[`${sizeKey}_${colorKey}`] ?? 0);
-      let copies = parseInt(copiesEl?.value, 10);
+      let copies = parseInt(copiesEl.value, 10);
       if (isNaN(copies) || copies <= 0) copies = 1;
-      const pagesCount = parsePageRange(pagesEl?.value || '', defaultPages || parseInt(totalPagesH?.value || 1));
+      const pagesCount = parsePageRange(pagesEl.value, defaultPages);
       const total = pricePerPage * copies * pagesCount;
-      if (totalAmount) totalAmount.value = pricePerPage ? `₱${total.toFixed(2)}` : 'No price configured';
-      if (hiddenTotal) hiddenTotal.value = pricePerPage ? total.toFixed(2) : '';
+      totalAmount.value = pricePerPage ? `₱${total.toFixed(2)}` : 'No price configured';
+      hiddenTotal.value = total.toFixed(2);
     }
 
-    // wire up inputs
+    // ✅ Sync visible fields to hidden ones before submitting
+    document.getElementById('printForm').addEventListener('submit', () => {
+      document.getElementById('hidden_pages').value = pagesEl.value || '';
+      document.getElementById('hidden_copies').value = copiesEl.value || '1';
+      document.getElementById('hidden_paper_size').value = paperSize.value || 'A4';
+      document.getElementById('hidden_color').value = colorSel.value || 'grayscale';
+    });
+
     [paperSize, colorSel, copiesEl, pagesEl].forEach(el => {
       el?.addEventListener('input', () => calculateTotal());
       el?.addEventListener('change', () => calculateTotal());
     });
 
-    // When page loads, show usbUI if server provided files
     window.addEventListener('DOMContentLoaded', () => {
       const hasInitialFiles = @json(!empty($pdfFiles) && count($pdfFiles) > 0);
       if (hasInitialFiles) {
         defaultUI.style.display = 'none';
         usbUI.style.display = 'block';
       }
-      // initial calc
-      calculateTotal(parseInt(totalPagesH?.value || 1));
+      calculateTotal(1);
     });
 
-
-    /* --------------------------------------------
-       SSE: Real-time USB updates from Flask
-       Flask stream should send JSON messages containing at least:
-         { status: "inserted"|"removed", files: [{name, path, pages}], pdf: "/full/path/to/file.pdf" }
-       -------------------------------------------- */
-
-    // Primary & fallback stream URLs; change as needed for your network
     const STREAM_URLS = [
       "http://127.0.0.1:5004/usb/stream",
       "http://192.168.1.18:5004/usb/stream"
@@ -231,103 +223,66 @@
     let currentStreamIndex = 0;
 
     function connectStream() {
-      if (evtSource) {
-        try { evtSource.close(); } catch(_) {}
-      }
+      if (evtSource) try { evtSource.close(); } catch(_) {}
       const url = STREAM_URLS[currentStreamIndex];
       console.log('Connecting USB stream to', url);
       evtSource = new EventSource(url);
 
-      evtSource.onopen = () => {
-        console.log('USB SSE connected to', url);
-      };
-
+      evtSource.onopen = () => console.log('USB SSE connected');
       evtSource.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
-          console.log('USB SSE message', data);
-
-          // If server provides 'files' array -> render list
           if (data.status === 'inserted') {
-            const files = data.files || (data.pdf ? [{ name: data.pdf.split('/').pop(), path: data.pdf, pages: data.pages || 1 }] : []);
+            const files = data.files || [];
             renderFileList(files);
-            // auto-show first file preview if present
-            if (files && files.length) {
-              defaultUI.style.display = 'none';
-              usbUI.style.display = 'block';
-            }
           } else if (data.status === 'removed') {
-            // show default UI again
             showDefaultUI();
           }
-        } catch (err) {
-          console.error('Invalid SSE payload', err, e.data);
-        }
+        } catch {}
       };
-
-      evtSource.onerror = (err) => {
-        console.warn('USB SSE error', err);
-        try { evtSource.close(); } catch(_) {}
-        // try next stream url (fallback) or reconnect after delay
+      evtSource.onerror = () => {
         currentStreamIndex = (currentStreamIndex + 1) % STREAM_URLS.length;
         setTimeout(connectStream, 2000);
       };
     }
 
-    // Render list of files into the UL without reloading page
     function renderFileList(files) {
-      if (!Array.isArray(files)) files = [];
-      // Clear list
       pdfListEl.innerHTML = '';
       if (files.length === 0) {
-        const li = document.createElement('li');
-        li.textContent = 'No PDF files found on USB.';
-        pdfListEl.appendChild(li);
-        // show usb UI but message
+        pdfListEl.innerHTML = '<li>No PDF files found on USB.</li>';
         defaultUI.style.display = 'none';
         usbUI.style.display = 'block';
         return;
       }
-
       files.forEach((f) => {
         const li = document.createElement('li');
         li.setAttribute('data-path', f.path || '');
         const nameSpan = document.createElement('span');
-        nameSpan.textContent = '📄 ' + (f.name || (f.path||'').split('/').pop());
+        nameSpan.textContent = '📄 ' + (f.name || '');
         const btnWrap = document.createElement('div');
         const btn = document.createElement('button');
         btn.className = 'btn-primary';
-        // Build preview URL using your named route - encode path
         const previewUrl = "{{ url('/') }}" + "/USBFD/preview/" + encodeURIComponent(f.path || '');
         btn.textContent = 'Select';
-        btn.onclick = () => previewPDF(previewUrl, f.name || (f.path||'').split('/').pop(), f.path || '', f.pages || 1);
+        btn.onclick = () => previewPDF(previewUrl, f.name, f.path, f.pages || 1);
         btnWrap.appendChild(btn);
         li.appendChild(nameSpan);
         li.appendChild(btnWrap);
         pdfListEl.appendChild(li);
       });
-
-      // Hide default UI, show usb UI
       defaultUI.style.display = 'none';
       usbUI.style.display = 'block';
     }
 
     function showDefaultUI() {
-      // hide usb UI and preview
-      if (pdfPreview) pdfPreview.style.display = 'none';
-      if (pdfListEl) pdfListEl.innerHTML = '';
+      pdfPreview.style.display = 'none';
+      pdfListEl.innerHTML = '';
       usbUI.style.display = 'none';
       defaultUI.style.display = 'block';
     }
 
-    // start SSE connection
     connectStream();
-
-    // graceful unload
-    window.addEventListener('beforeunload', () => {
-      try { evtSource.close(); } catch(_) {}
-    });
-
+    window.addEventListener('beforeunload', () => { try { evtSource.close(); } catch(_) {} });
   </script>
 </body>
 </html>

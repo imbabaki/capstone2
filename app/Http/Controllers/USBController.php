@@ -7,32 +7,26 @@ use Illuminate\Support\Facades\File;
 use App\Models\PrintSetting;
 use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+use App\Models\PrintLog;
+use App\Models\Voucher;
+use App\Models\VoucherSetting;
+use Carbon\Carbon;
+
 
 class USBController extends Controller
 {
+    // ✅ Detect mounted USB
     private function getMountedUsbPath(): ?string
     {
-        $user = trim(shell_exec('whoami'));
-        $candidates = ["/media/$user", "/media/usb", "/mnt/usb", "/mnt/ESD-ISO"];
-
-        foreach ($candidates as $root) {
-            if (File::exists($root)) {
-                $dirs = File::isDirectory($root) ? File::directories($root) : [];
-                if (!empty($dirs)) return $dirs[0];
-                return $root;
+        $possible = File::directories('/mnt');
+        foreach ($possible as $path) {
+            if (File::isDirectory($path) && File::isReadable($path)) {
+                return $path; // e.g. /mnt/USBDrive
             }
         }
         return null;
-    }
-
-    private function safeJoin(string $base, string $name): ?string
-    {
-        $full = realpath($base . DIRECTORY_SEPARATOR . $name);
-        if ($full === false) return null;
-        if (strpos($full, realpath($base)) !== 0) return null;
-        return $full;
     }
 
     private function pagesRegex(): string
@@ -72,12 +66,7 @@ class USBController extends Controller
         return env('CUPS_PRINTER') ?: null;
     }
 
-    private function sanitizeOption(string $value): ?string
-    {
-        return preg_match('/^[A-Za-z0-9._-]+$/', $value) ? $value : null;
-    }
-
-    // 🧩 Display files from USB
+    // 🧩 List files from mounted USB
     public function index()
     {
         $usbPath = $this->getMountedUsbPath();
@@ -85,29 +74,25 @@ class USBController extends Controller
         $files = collect();
 
         if (!$usbPath) {
-            $error = 'No USB device detected.';
+            $error = 'No USB device detected or mounted.';
         } else {
-            if (File::isDirectory($usbPath) && File::isReadable($usbPath)) {
-                $parser = new Parser();
-                $files = collect(File::files($usbPath))
-                    ->filter(fn($f) => strtolower($f->getExtension()) === 'pdf')
-                    ->map(function ($f) use ($parser) {
-                        $pages = 1;
-                        try {
-                            $pdf = $parser->parseFile($f->getRealPath());
-                            $pages = count($pdf->getPages()) ?: 1;
-                        } catch (\Throwable $e) {}
-                        return [
-                            'name'  => $f->getFilename(),
-                            'path'  => $f->getRealPath(),
-                            'pages' => $pages,
-                        ];
-                    })->values();
+            $parser = new Parser();
+            $files = collect(File::files($usbPath))
+                ->filter(fn($f) => strtolower($f->getExtension()) === 'pdf')
+                ->map(function ($f) use ($parser) {
+                    $pages = 1;
+                    try {
+                        $pdf = $parser->parseFile($f->getRealPath());
+                        $pages = count($pdf->getPages()) ?: 1;
+                    } catch (\Throwable $e) {}
+                    return [
+                        'name'  => $f->getFilename(),
+                        'path'  => $f->getRealPath(),
+                        'pages' => $pages,
+                    ];
+                })->values();
 
-                if ($files->isEmpty()) $error = 'No PDF files found on the USB drive.';
-            } else {
-                $error = 'Cannot read USB directory. Check permissions.';
-            }
+            if ($files->isEmpty()) $error = 'No PDF files found on USB drive.';
         }
 
         $pricing = PrintSetting::all()->mapWithKeys(function ($s) {
@@ -123,242 +108,399 @@ class USBController extends Controller
         ]);
     }
 
-    // 🧾 Review before payment
-    public function review(Request $request)
+    // ✅ PDF Preview (with encoded path support)
+    public function preview($filepath)
     {
-        $request->validate([
-            'file'       => 'required|string',
-            'copies'     => 'required|integer|min:1|max:100',
-            'color'      => 'required|in:color,grayscale',
-            'paper_size' => 'required|string',
-            'pages'      => ['nullable', 'string'],
-            'duplex'     => 'nullable|in:one-sided,two-sided-long-edge,two-sided-short-edge',
-            'fit'        => 'nullable|in:none,fit-to-page',
-            'printer'    => 'nullable|string',
-        ]);
+        $decodedPath = urldecode($filepath);
 
-        $usbPath = $this->getMountedUsbPath();
-        if (!$usbPath) return back()->with('error', 'USB not mounted.');
-
-        $fileRealPath = $this->safeJoin($usbPath, $request->input('file'));
-        if (!$fileRealPath || !file_exists($fileRealPath)) {
-            return back()->with('error', 'File not found on USB.');
+        // 🩹 Handle cases where path includes encoded slashes (%2F)
+        if (!file_exists($decodedPath)) {
+            $decodedPath = str_replace('|', '/', $decodedPath); // optional fallback
         }
 
-        $pagesInput = trim((string)$request->input('pages', ''));
-        if ($pagesInput !== '' && !preg_match($this->pagesRegex(), $pagesInput)) {
-            return back()->with('error', 'Invalid page format. Use "1,2,4-6" etc.');
+        if (!file_exists($decodedPath)) {
+            return response()->json(['error' => 'File not found: ' . $decodedPath], 404);
         }
 
-        $copies    = (int)$request->input('copies', 1);
-        $paperSize = $request->input('paper_size');
-        $color     = $request->input('color');
-        $rate      = $this->getRatePerPage($paperSize, $color);
-        if ($rate === null) return back()->with('error', 'Pricing not configured.');
-
-        $pageCount = $this->countPagesFromRanges($pagesInput);
-        if ($pageCount === 0) {
-            try {
-                $parser = new Parser();
-                $pdf    = $parser->parseFile($fileRealPath);
-                $pageCount = max(1, count($pdf->getPages()));
-            } catch (\Throwable $e) {
-                $pageCount = 1;
-            }
-        }
-
-        $subtotal = $copies * $pageCount * $rate;
-
-        $order = [
-            'file_name'  => basename($fileRealPath),
-            'file_path'  => $fileRealPath,
-            'copies'     => $copies,
-            'pages'      => $pagesInput,
-            'page_count' => $pageCount,
-            'color'      => $color,
-            'paper_size' => $paperSize,
-            'duplex'     => $request->input('duplex', 'one-sided'),
-            'fit'        => $request->input('fit', 'none'),
-            'printer'    => $request->input('printer') ?? $this->getDefaultPrinter(),
-            'rate'       => $rate,
-            'subtotal'   => $subtotal,
-            'total'      => $subtotal,
-            'paid'       => false,
-        ];
-
-        session(['usb.order' => $order]);
-
-        return redirect()->route('usbfd.payment');
+        return response()->file($decodedPath, ['Content-Type' => 'application/pdf']);
     }
 
-    // 💰 Payment page
-    public function paymentPage()
-    {
-        $order = session('usb.order');
-        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No job in progress.');
+  // ✅ Process payment (CREATE ORDER FROM FORM DATA)
+public function processPayment(Request $request)
+{
+    // Validate incoming data
+    $request->validate([
+        'file' => 'required|string',
+        'file_path' => 'required|string',
+        'copies' => 'required|integer|min:1',
+        'pages' => 'nullable|string',
+        'color' => 'required|in:color,grayscale',
+        'paper_size' => 'required|string',
+        'total' => 'required|numeric|min:0',
+    ]);
 
+    // Get the file path and verify it exists
+    $filePath = $request->input('file_path');
+    if (!file_exists($filePath)) {
+        return redirect()->route('usbfd.index')->with('error', 'File not found on USB.');
+    }
+
+    // Calculate pricing
+    $paperSize = $request->input('paper_size');
+    $color = $request->input('color');
+    $rate = $this->getRatePerPage($paperSize, $color) ?? 0;
+    
+    // Count pages
+    $pagesInput = $request->input('pages', '');
+    $pageCount = $this->countPagesFromRanges($pagesInput);
+    
+    // If no page range specified, get total pages from PDF
+    if ($pageCount === 0) {
         try {
-            $response = Http::timeout(2)->get('http://127.0.0.1:5003/coin/total');
-            $coinTotal = $response->json('total') ?? 0;
-        } catch (\Exception $e) {
-            $coinTotal = 0;
+            $parser = new Parser();
+            $pdf = $parser->parseFile($filePath);
+            $pageCount = max(1, count($pdf->getPages()));
+        } catch (\Throwable $e) {
+            $pageCount = 1;
         }
-
-        return view('USBFD.payment', [
-            'order'     => $order,
-            'coinTotal' => $coinTotal,
-        ]);
     }
 
-    // 🖨️ Final print
-    public function doFinalPrint(Request $request)
-    {
-        $order = session('usb.order');
-        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No job in progress.');
-        if (empty($order['paid'])) return redirect()->route('usbfd.payment')->with('error', 'Please complete payment first.');
+    $copies = (int) $request->input('copies', 1);
+    $calculatedTotal = $rate * $pageCount * $copies;
 
-        $usbPath = $this->getMountedUsbPath();
-        if (!$usbPath) return redirect()->route('usbfd.index')->with('error', 'USB not mounted.');
+    // Create order in session
+    $order = [
+        'file_name'  => $request->input('file'),
+        'file_path'  => $filePath,
+        'copies'     => $copies,
+        'pages'      => $pagesInput,
+        'page_count' => $pageCount,
+        'color'      => $color,
+        'paper_size' => $paperSize,
+        'duplex'     => $request->input('duplex', 'one-sided'),
+        'fit'        => $request->input('fit', 'none'),
+        'rate'       => $rate,
+        'subtotal'   => $calculatedTotal,
+        'total'      => $calculatedTotal,
+        'paid'       => false,
+    ];
 
-        $real = realpath($order['file_path']);
-        if (!$real || strpos($real, realpath($usbPath)) !== 0) {
-            return redirect()->route('usbfd.index')->with('error', 'File path invalid or not on USB.');
-        }
+    Session::put('usb.order', $order);
+    Session::save();
 
-        $printer = $order['printer'] ?? $this->getDefaultPrinter();
-        $copies  = (int)($order['copies'] ?? 1);
-        $pages   = $order['pages'] ?? '';
-        $color   = $order['color'] ?? 'color';
-        $paper   = $order['paper_size'] ?? null;
-        $duplex  = $order['duplex'] ?? 'one-sided';
-        $fit     = $order['fit'] ?? 'none';
+    // Now redirect to payment page
+    return redirect()->route('usbfd.payment');
+}
 
-        if (!$printer) return back()->with('error', 'No printer configured.');
-
-        $cmd = ['lp', '-d', $printer, '-n', (string) max(1, $copies)];
-        if (!empty($pages)) $cmd[] = '-o page-ranges=' . $pages;
-        $cmd[] = '-o ' . (($color === 'grayscale') ? 'ColorModel=Gray' : 'ColorModel=RGB');
-        if ($paper && ($opt = $this->sanitizeOption($paper))) $cmd[] = '-o media=' . $opt;
-        if (in_array($duplex, ['one-sided','two-sided-long-edge','two-sided-short-edge'], true)) $cmd[] = '-o sides=' . $duplex;
-        if ($fit === 'fit-to-page') $cmd[] = '-o fit-to-page';
-        $cmd[] = escapeshellarg($real);
-
-        $final = implode(' ', $cmd) . ' 2>&1';
-        $output = shell_exec($final);
-        Log::info('CUPS print command', ['cmd' => $final, 'output' => $output]);
-
-        session()->forget('usb.order');
-        return redirect()->route('usb.success')->with('message', 'Print job sent to CUPS.');
+// 💰 Payment page - SHOW THE PAYMENT INTERFACE
+public function paymentPage()
+{
+    $order = Session::get('usb.order');
+    
+    if (!$order) {
+        return redirect()->route('usbfd.index')->with('error', 'No order found. Please select a file first.');
     }
 
-    // 🧾 Process payment request
-    public function processPayment(Request $request)
-    {
-        $usbPath = $this->getMountedUsbPath();
-        if (!$usbPath) return redirect()->route('usbfd.index')->with('error', 'USB not mounted.');
-
-        $realPath = realpath($request->input('file_path'));
-        if (!$realPath || strpos($realPath, realpath($usbPath)) !== 0) {
-            return redirect()->route('usbfd.index')->with('error', 'Invalid file path.');
-        }
-
-        $copies = (int) $request->input('copies', 1);
-        $pages = $request->input('pages');
-        $color = $request->input('color');
-        $paperSize = $request->input('paper_size');
-        $rate = $this->getRatePerPage($paperSize, $color) ?? 0;
-
-        $pageCount = $this->countPagesFromRanges($pages);
-        if ($pageCount === 0) {
-            try {
-                $parser = new Parser();
-                $pdf = $parser->parseFile($realPath);
-                $pageCount = max(1, count($pdf->getPages()));
-            } catch (\Throwable $e) {
-                $pageCount = 1;
-            }
-        }
-
-        $subtotal = $copies * $pageCount * $rate;
-
-        $order = [
-            'file_name' => basename($realPath),
-            'file_path' => $realPath,
-            'copies' => $copies,
-            'pages' => $pages,
-            'page_count' => $pageCount,
-            'color' => $color,
-            'paper_size' => $paperSize,
-            'duplex' => $request->input('duplex', 'one-sided'),
-            'rate' => $rate,
-            'subtotal' => $subtotal,
-            'total' => $subtotal,
-            'paid' => false,
-        ];
-
-        session(['usb.order' => $order]);
-        return redirect()->route('usbfd.payment');
+    // Get coin total from Flask server
+    try {
+        $response = Http::timeout(3)->get('http://127.0.0.1:5003/coin/total');
+        $coinTotal = $response->json('total') ?? 0;
+    } catch (\Exception $e) {
+        $coinTotal = 0;
     }
 
-    // ✅ Handle payment confirmation
-    public function handlePayment()
-    {
-        $order = session('usb.order');
-        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No order found.');
+    return view('USBFD.payment', [
+        'order' => $order,
+        'coinTotal' => $coinTotal,
+    ]);
+}
+public function handlePayment()
+{
+    $order = Session::get('usb.order');
+    
+    if (!$order) {
+        return redirect()->route('usbfd.index')->with('error', 'No order found.');
+    }
 
-        $order['paid'] = true;
-        session(['usb.order' => $order]);
-
-        try {
-            Http::timeout(2)->post('http://127.0.0.1:5003/coin/reset');
-        } catch (\Exception $e) {
-            Log::warning("Failed to reset coin total: " . $e->getMessage());
-        }
-
+    if (!empty($order['paid'])) {
         return redirect()->route('usbfd.instruction');
     }
 
+    // Get coin total from Flask
+    try {
+        $response = Http::timeout(3)->get('http://127.0.0.1:5003/coin/total');
+        $coinTotal = $response->json('total') ?? 0;
+    } catch (\Exception $e) {
+        $coinTotal = 0;
+    }
+
+    $orderTotal = $order['total'] ?? 0;
+
+    if ($coinTotal < $orderTotal) {
+        return back()->with('error', 'Insufficient payment. Please insert ₱' . number_format($orderTotal - $coinTotal, 2));
+    }
+
+    // ✅ Calculate change
+    $change = $coinTotal - $orderTotal;
+    $voucher = null;
+
+    // ✅ Generate voucher if there's change
+    if ($change > 0) {
+        $expirationDays = (int) VoucherSetting::getExpirationDays(); // ✅ Cast to int
+        
+        $voucher = Voucher::create([
+            'code' => Voucher::generateCode(),
+            'amount' => $change,
+            'source' => 'USB',
+            'expires_at' => Carbon::now()->addDays($expirationDays), // ✅ Now properly typed
+            'expiration_days' => $expirationDays,
+        ]);
+
+        Log::info('Voucher generated', [
+            'code' => $voucher->code,
+            'amount' => $change,
+            'expires_at' => $voucher->expires_at,
+        ]);
+    }
+
+    // Mark as paid
+    $order['paid'] = true;
+    $order['voucher_code'] = $voucher?->code;
+    $order['change_amount'] = $change;
+    $order['voucher_expires_at'] = $voucher?->expires_at?->format('M d, Y');
+    Session::put('usb.order', $order);
+    Session::save();
+
+    // Reset coin counter
+    try {
+        Http::timeout(2)->post('http://127.0.0.1:5003/coin/reset');
+    } catch (\Exception $e) {
+        Log::warning('Failed to reset coin total: ' . $e->getMessage());
+    }
+
+    return redirect()->route('usbfd.instruction')->with('message', 'Payment successful!');
+}
+// 🖨️ Execute the actual print job
+public function printNow(Request $request)
+{
+    $order = Session::get('usb.order');
+    
+    if (!$order) {
+        return redirect()->route('usbfd.index')->with('error', 'No order found.');
+    }
+
+    // Verify payment was completed
+    if (empty($order['paid'])) {
+        return redirect()->route('usbfd.payment')->with('error', 'Please complete payment first.');
+    }
+
+    // Verify file still exists
+    $filePath = $order['file_path'];
+    if (!file_exists($filePath)) {
+        return redirect()->route('usbfd.index')->with('error', 'File not found on USB.');
+    }
+
+    // Get printer
+    $printer = $order['printer'] ?? $this->getDefaultPrinter();
+    if (!$printer) {
+        return back()->with('error', 'No printer configured.');
+    }
+
+    // Build print command
+    $copies = (int) ($order['copies'] ?? 1);
+    $pagesInput = $order['pages'] ?? '';
+    $color = $order['color'] ?? 'grayscale';
+    $paperSize = $order['paper_size'] ?? 'A4';
+    $duplex = $order['duplex'] ?? 'one-sided';
+    $fit = $order['fit'] ?? 'none';
+
+    $cmd = [
+        'lp',
+        '-d', escapeshellarg($printer),
+        '-n', escapeshellarg((string) max(1, $copies))
+    ];
+
+    // Add page range if specified
+    if (!empty($pagesInput)) {
+        $cmd[] = '-P ' . escapeshellarg($pagesInput);
+    }
+
+    // Color mode
+    $cmd[] = '-o ' . ($color === 'grayscale' ? 'ColorModel=Gray' : 'ColorModel=RGB');
+
+    // Paper size
+    if ($paperSize) {
+        $cmd[] = '-o media=' . escapeshellarg($paperSize);
+    }
+
+    // Duplex
+    if (in_array($duplex, ['one-sided', 'two-sided-long-edge', 'two-sided-short-edge'], true)) {
+        $cmd[] = '-o sides=' . escapeshellarg($duplex);
+    }
+
+    // Fit to page
+    if ($fit === 'fit-to-page') {
+        $cmd[] = '-o fit-to-page';
+    }
+
+    // Add file path
+    $cmd[] = escapeshellarg($filePath);
+
+    // Execute print command
+    $finalCmd = implode(' ', $cmd) . ' 2>&1';
+    $output = shell_exec($finalCmd);
+
+    Log::info('USB Print Command', [
+        'command' => $finalCmd,
+        'output' => $output,
+        'order' => $order
+    ]);
+
+    // Log the print job
+    PrintLog::create([
+        'source' => 'USB',
+        'file_name' => basename($order['file_path']),
+        'copies' => $order['copies'],
+        'page_count' => $order['page_count'] ?? 1,
+        'paper_size' => $order['paper_size'],
+        'color_option' => $order['color_option'],
+        'rate_per_page' => $order['rate'] ?? 0,
+        'total_amount' => $order['calculated_total'] ?? 0,
+    ]);
+
+    // Keep order in session for success page, mark as completed
+    $order['print_completed'] = true;
+    Session::put('usb.order', $order);
+    Session::save();
+
+    return redirect()->route('usb.success')->with('message', 'Print job sent successfully!');
+}
+    // 📄 Instruction page
     public function instruction()
     {
         $order = session('usb.order');
-        if (!$order) return redirect()->route('usbfd.index')->with('error', 'No order found.');
+        if (!$order) {
+            return redirect()->route('usbfd.index')->with('error', 'No order found.');
+        }
+
         return view('USBFD.instructions', compact('order'));
     }
 
+    // ✅ Success page
     public function success()
     {
-        return view('USBFD.success');
-    }
+        $order = Session::get('usb.order');
 
-    public function status()
-    {
-        $usbPath = $this->getMountedUsbPath();
-        $hasUSB = $usbPath && File::isDirectory($usbPath);
-        $pdfFiles = [];
-
-        if ($hasUSB) {
-            $parser = new Parser();
-            $files = collect(File::files($usbPath))
-                ->filter(fn($f) => strtolower($f->getExtension()) === 'pdf')
-                ->map(function ($f) use ($parser) {
-                    $pages = 1;
-                    try {
-                        $pdf = $parser->parseFile($f->getRealPath());
-                        $pages = count($pdf->getPages()) ?: 1;
-                    } catch (\Throwable $e) {}
-                    return [
-                        'name' => $f->getFilename(),
-                        'path' => $f->getRealPath(),
-                        'pages' => $pages,
-                    ];
-                })->values();
-
-            $pdfFiles = $files->toArray();
+        if (!$order) {
+            return redirect()->route('usbfd.index')
+                ->with('error', 'No active order found');
         }
 
-        return response()->json([
-            'hasUSB' => $hasUSB,
-            'files' => $pdfFiles,
-        ]);
+        // Verify that print was completed
+        if (empty($order['print_completed'])) {
+            return redirect()->route('usbfd.instruction')
+                ->with('error', 'Please complete printing first.');
+        }
+
+        // Clear session after displaying success
+        Session::forget('usb.order');
+        Session::save();
+
+        return view('USBFD.success', ['order' => $order]);
     }
+    // 🖨️ Execute the actual print job (in USBController.php)
+public function doFinalPrint(Request $request)
+{
+    $order = Session::get('usb.order');
+    
+    if (!$order) {
+        return redirect()->route('usbfd.index')->with('error', 'No order found.');
+    }
+
+    // Verify payment was completed
+    if (empty($order['paid'])) {
+        return redirect()->route('usbfd.payment')->with('error', 'Please complete payment first.');
+    }
+
+    // Verify file still exists
+    $filePath = $order['file_path'];
+    if (!file_exists($filePath)) {
+        return redirect()->route('usbfd.index')->with('error', 'File not found on USB.');
+    }
+
+    // Get printer
+    $printer = $order['printer'] ?? $this->getDefaultPrinter();
+    if (!$printer) {
+        return back()->with('error', 'No printer configured.');
+    }
+
+    // Build print command
+    $copies = (int) ($order['copies'] ?? 1);
+    $pagesInput = $order['pages'] ?? '';
+    $color = $order['color'] ?? 'grayscale';
+    $paperSize = $order['paper_size'] ?? 'A4';
+    $duplex = $order['duplex'] ?? 'one-sided';
+    $fit = $order['fit'] ?? 'none';
+
+    $cmd = [
+        'lp',
+        '-d', escapeshellarg($printer),
+        '-n', escapeshellarg((string) max(1, $copies))
+    ];
+
+    // Add page range if specified
+    if (!empty($pagesInput)) {
+        $cmd[] = '-P ' . escapeshellarg($pagesInput);
+    }
+
+    // Color mode
+    $cmd[] = '-o ' . ($color === 'grayscale' ? 'ColorModel=Gray' : 'ColorModel=RGB');
+
+    // Paper size
+    if ($paperSize) {
+        $cmd[] = '-o media=' . escapeshellarg($paperSize);
+    }
+
+    // Duplex
+    if (in_array($duplex, ['one-sided', 'two-sided-long-edge', 'two-sided-short-edge'], true)) {
+        $cmd[] = '-o sides=' . escapeshellarg($duplex);
+    }
+
+    // Fit to page
+    if ($fit === 'fit-to-page') {
+        $cmd[] = '-o fit-to-page';
+    }
+
+    // Add file path
+    $cmd[] = escapeshellarg($filePath);
+
+    // Execute print command
+    $finalCmd = implode(' ', $cmd) . ' 2>&1';
+    $output = shell_exec($finalCmd);
+
+    Log::info('USB Print Command', [
+        'command' => $finalCmd,
+        'output' => $output,
+        'order' => $order
+    ]);
+
+    // ✅ LOG THE PRINT JOB
+    PrintLog::create([
+        'source' => 'USB',
+        'file_name' => $order['file_name'],
+        'copies' => $order['copies'],
+        'page_count' => $order['page_count'],
+        'paper_size' => $order['paper_size'],
+        'color_option' => $order['color'],
+        'rate_per_page' => $order['rate'],
+        'total_amount' => $order['total'],
+    ]);
+
+
+    // Clear session order
+    Session::forget('usb.order');
+    Session::save();
+
+    return redirect()->route('usb.success')->with('message', 'Print job sent successfully!');
+}
 }

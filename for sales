@@ -1,0 +1,21 @@
+PrintLog::create([
+    'source' => 'QR',
+    'file_name' => $order['file_name'],
+    'copies' => $order['copies'],
+    'page_count' => $order['page_count'],
+    'paper_size' => $order['paper_size'],
+    'color_option' => $order['color'],
+    'rate_per_page' => $order['rate'],
+    'total_amount' => $order['total'],
+]);
+
+PrintLog::create([
+    'source' => 'Bluetooth',
+    'file_name' => $filename,
+    'copies' => $copies,
+    'page_count' => $pageCount,
+    'paper_size' => $paperSize,
+    'color_option' => $color,
+    'rate_per_page' => $rate,
+    'total_amount' => $totalAmount,
+]);

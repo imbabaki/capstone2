@@ -13,12 +13,13 @@ use App\Http\Controllers\OptionsController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\Admin\SalesReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-
+Route::get('/admin/sales-report', [App\Http\Controllers\Admin\SalesReportController::class, 'index'])->name('admin.sales.report');
 
 // Start screen
 Route::get('/', function () {
@@ -43,30 +44,49 @@ Route::post('/upload/form', [FileUploadController::class, 'store'])->name('uploa
 // Edit settings
 Route::get('/upload/edit/{filename}', [FileUploadController::class, 'edit'])->name('upload.edit');
 
-// Payment summary (GET only)
+// Payment routes (both GET and POST)
 Route::post('/upload/payment', [FileUploadController::class, 'paymentPage'])->name('upload.payment');
+Route::get('/upload/payment', [FileUploadController::class, 'paymentView'])->name('upload.payment.view');
 
-// Instructions page (GET only)
+// Voucher and payment handling
+Route::post('/upload/apply-voucher', [FileUploadController::class, 'applyVoucher'])->name('upload.applyVoucher');
+Route::post('/upload/handle-payment', [FileUploadController::class, 'handlePayment'])->name('upload.handlePayment');
+
+// Instructions and printing
 Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
-
-// Print (POST only)
 Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
 
-// ✅ Check if a file has been uploaded (for kiosk auto-redirect)
-Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
+// Success and utilities
 Route::get('/upload/success', [FileUploadController::class, 'success'])->name('upload.success');
+Route::get('/check-upload', [FileUploadController::class, 'checkUpload'])->name('upload.check');
+
+// Legacy route (kept for compatibility)
 Route::get('/upload/payments', [FileUploadController::class, 'handlePayment'])->name('upload.payments');
 
 
 // Bluetooth functionality
 
 
+// Bluetooth routes
+// Bluetooth Routes - Organized and cleaned up
 Route::get('/bluetooth', [BluetoothController::class, 'index'])->name('bluetooth.index');
 Route::post('/bluetooth/enable', [BluetoothController::class, 'enable'])->name('bluetooth.enable');
-Route::get('/bluetooth/print/{filename}', [BluetoothController::class, 'print'])->name('bluetooth.print');
+Route::post('/bluetooth/disable', [BluetoothController::class, 'disable'])->name('bluetooth.disable');
+Route::get('/bluetooth/preview/{filename}', [BluetoothController::class, 'preview'])->name('bluetooth.preview');
 
-// This route handles Flask redirect and automatically prints
-Route::get('/bluetooth/edit/{filename}', [BluetoothController::class, 'handleUploadRedirect'])->name('bluetooth.edit');
+// Payment routes (both GET and POST)
+Route::post('/bluetooth/payment', [BluetoothController::class, 'payment'])->name('bluetooth.payment');
+Route::get('/bluetooth/payment', [BluetoothController::class, 'paymentView'])->name('bluetooth.payment.view');
+
+// Voucher and payment handling
+Route::post('/bluetooth/apply-voucher', [BluetoothController::class, 'applyVoucher'])->name('bluetooth.applyVoucher');
+Route::post('/bluetooth/handle-payment', [BluetoothController::class, 'handlePayment'])->name('bluetooth.handlePayment');
+
+// Instruction and printing
+Route::get('/bluetooth/instruction', [BluetoothController::class, 'instruction'])->name('bluetooth.instruction');
+Route::post('/bluetooth/print-job', [BluetoothController::class, 'printJob'])->name('bluetooth.printJob');
+Route::get('/bluetooth/success', [BluetoothController::class, 'success'])->name('bluetooth.success');
+Route::get('/bluetooth/complete', [BluetoothController::class, 'complete'])->name('bluetooth.complete');
 
 
 // USB Flash Drive flow
@@ -94,9 +114,18 @@ Route::get('/coin/total', function () {
         return response()->json(['total' => 0]);
     }
 });
+// Manual voucher generation
+Route::get('/admin/vouchers/generate', [App\Http\Controllers\Admin\VoucherManagementController::class, 'showGenerateForm'])->name('admin.vouchers.generate');
+Route::post('/admin/vouchers/generate', [App\Http\Controllers\Admin\VoucherManagementController::class, 'generateManual'])->name('admin.vouchers.generate.store');
 
+// Voucher routes
+Route::get('/voucher/check', [App\Http\Controllers\VoucherController::class, 'check'])->name('voucher.check');
+Route::post('/voucher/apply', [App\Http\Controllers\VoucherController::class, 'apply'])->name('voucher.apply');
 
-
+// Admin voucher management
+Route::get('/admin/voucher-settings', [App\Http\Controllers\Admin\VoucherSettingController::class, 'index'])->name('admin.voucher.settings');
+Route::post('/admin/voucher-settings', [App\Http\Controllers\Admin\VoucherSettingController::class, 'update'])->name('admin.voucher.settings.update');
+Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherManagementController::class, 'index'])->name('admin.vouchers.index');
 
 // Admin Pricing
 Route::resource('admin/print-settings', PrintSettingController::class);

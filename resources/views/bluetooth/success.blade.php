@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Print Success - USB Flash Drive</title>
+    <title>Print Success - Bluetooth</title>
 
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
@@ -19,7 +19,7 @@
         ::-webkit-scrollbar { display: none; }
 
         body {
-            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -54,21 +54,27 @@
             animation: fadeInUp 0.6s ease-in-out;
         }
 
+        .print-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
         .countdown {
             font-size: 48px;
             font-weight: bold;
-            color: #2193b0;
+            color: #667eea;
         }
 
         .btn-new-print {
-            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             transition: transform 0.2s;
         }
 
         .btn-new-print:hover {
             transform: scale(1.05);
-            background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
     </style>
 </head>
@@ -88,12 +94,12 @@
 
             <!-- Print Details -->
             @if(isset($order))
-            <div class="bg-light rounded p-4 mb-4">
+            <div class="print-details mb-4">
                 <h5 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>Print Details</h5>
                 <div class="row text-start">
                     <div class="col-6 mb-2">
                         <small class="text-muted">File:</small>
-                        <div><strong>{{ basename($order['file_path'] ?? 'N/A') }}</strong></div>
+                        <div><strong>{{ $order['file_name'] ?? 'N/A' }}</strong></div>
                     </div>
                     <div class="col-6 mb-2">
                         <small class="text-muted">Copies:</small>
@@ -139,7 +145,7 @@
 
             <!-- Manual Navigation -->
             <div class="d-grid gap-2">
-                <a href="{{ route('usbfd.index') }}" class="btn btn-new-print btn-lg text-white">
+                <a href="{{ route('bluetooth.index') }}" class="btn btn-new-print btn-lg text-white">
                     <i class="bi bi-plus-circle me-2"></i>Print Another Document
                 </a>
                 <a href="{{ route('start') }}" class="btn btn-outline-secondary btn-lg">
@@ -168,7 +174,7 @@
         }
     }, 1000);
 
-    console.log('✅ USB Print job completed successfully');
+    console.log('✅ Print job completed successfully');
 </script>
 
 </body>

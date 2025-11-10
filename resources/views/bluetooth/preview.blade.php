@@ -189,8 +189,8 @@ use Illuminate\Support\Str;
           <label for="copies">Copies</label>
           <input type="number" id="copies" name="copies" value="1" min="1">
 
-          <label for="pages">Pages (e.g., 1-3,5)</label>
-          <input type="text" id="pages" name="pages" value="1">
+          <label for="pages">Pages (leave empty for all pages)</label>
+          <input type="text" id="pages" name="pages" value="" placeholder="All pages">
 
           <label for="color_option">Color</label>
           <select id="color_option" name="color_option">
@@ -246,7 +246,8 @@ use Illuminate\Support\Str;
 
     // Parses custom page ranges (e.g., 1-3,5)
     function parsePageRange(range) {
-      if (!range || range.trim() === '') {
+      // If empty or whitespace, print all pages
+      if (!range || range.trim() === '' || range.trim().toLowerCase() === 'all') {
         return totalPdfPages;
       }
 

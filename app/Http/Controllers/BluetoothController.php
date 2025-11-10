@@ -207,16 +207,16 @@ class BluetoothController extends Controller
         ]);
 
         // Calculate actual page count
-        $pagesInput = $validated['pages'] ?? '';
-        $pageCount = $this->countPagesFromRanges($pagesInput);
-        
-        // If no range specified, try to get from PDF
-        if ($pageCount === 0) {
+        $pagesInput = trim($validated['pages'] ?? '');
+
+        // If empty or "All", get the actual PDF page count
+        if (empty($pagesInput) || strtolower($pagesInput) === 'all') {
             $possiblePaths = [
                 "/home/instaprint/Downloads/" . $validated['file_name'],
                 public_path('storage/uploads/' . $validated['file_name']),
             ];
-            
+
+            $pageCount = 1; // default
             foreach ($possiblePaths as $path) {
                 if (file_exists($path)) {
                     try {
@@ -229,6 +229,11 @@ class BluetoothController extends Controller
                     }
                 }
             }
+            // Store "All" for display purposes
+            $pagesInput = 'All';
+        } else {
+            // User specified specific pages
+            $pageCount = $this->countPagesFromRanges($pagesInput);
         }
 
         // Get existing order from session or create new
@@ -529,10 +534,44 @@ class BluetoothController extends Controller
                 Log::warning('Failed to reset coin total: ' . $e->getMessage());
             }
 
+            // ✅ START DISPENSING PAPERS IMMEDIATELY AFTER PAYMENT
+            $pagesInput = trim($order['pages'] ?? 'All');
+            $pagesToPrint = $order['page_count'] ?? 1;
+
+            // Calculate the page string to send to dispenser
+            $dispenserPages = '';
+            if (!empty($pagesInput) && strtolower($pagesInput) !== 'all') {
+                // Specific pages selected (e.g., "1-3,5")
+                $dispenserPages = $pagesInput;
+            } else {
+                // All pages - send format "1-X" where X is total pages
+                $dispenserPages = "1-{$pagesToPrint}";
+            }
+
+            try {
+                $dispenserResponse = Http::timeout(10)->post('http://127.0.0.1:5005/start', [
+                    'paper_size' => $order['paper_size'],
+                    'copies' => $order['copies'],
+                    'pages' => $dispenserPages
+                ]);
+
+                Log::info("Dispenser started after payment:", [
+                    'paper_size' => $order['paper_size'],
+                    'copies' => $order['copies'],
+                    'pages_sent' => $dispenserPages,
+                    'calculated_sheets' => $pagesToPrint * $order['copies'],
+                    'response' => $dispenserResponse->json(),
+                    'status' => $dispenserResponse->status()
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to start dispenser after payment: " . $e->getMessage());
+                // Don't fail the payment if dispenser fails, just log it
+            }
+
             Log::info('=== HANDLE PAYMENT COMPLETED SUCCESSFULLY ===');
 
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Payment successful!',
                 'redirect' => route('bluetooth.instruction'),
                 'debug' => [
@@ -577,7 +616,7 @@ class BluetoothController extends Controller
     public function printJob(Request $request)
     {
         $order = Session::get('bluetooth.order');
-        
+
         if (!$order) {
             return response()->json([
                 'success' => false,
@@ -594,7 +633,7 @@ class BluetoothController extends Controller
         }
 
         $filename = $order['file_name'];
-        
+
         // Find the file
         $possiblePaths = [
             "/home/instaprint/Downloads/" . $filename,
@@ -618,35 +657,81 @@ class BluetoothController extends Controller
             ], 404);
         }
 
+        // Calculate actual pages to print
+        $pagesInput = trim($order['pages'] ?? 'All');
+        $pagesToPrint = $order['page_count'] ?? 1;
+
+        // If "All" or empty, make sure we have the actual PDF page count
+        if (empty($pagesInput) || strtolower($pagesInput) === 'all') {
+            // If page_count is already set in order, use it
+            // Otherwise, try to parse the PDF
+            if (!isset($order['page_count']) || $order['page_count'] <= 1) {
+                $possiblePaths = [
+                    "/home/instaprint/Downloads/" . $filename,
+                    "/var/www/html/laravel/public/storage/uploads/" . $filename,
+                    storage_path('app/public/uploads/' . $filename),
+                    public_path('storage/uploads/' . $filename),
+                ];
+
+                foreach ($possiblePaths as $path) {
+                    if (file_exists($path)) {
+                        try {
+                            $parser = new PdfParser();
+                            $pdf = $parser->parseFile($path);
+                            $pagesToPrint = max(1, count($pdf->getPages()));
+                            Log::info("Parsed PDF page count: {$pagesToPrint}");
+                            break;
+                        } catch (\Exception $e) {
+                            Log::warning("Failed to parse PDF: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+            $pagesInput = ''; // Empty means "all" for CUPS
+        } else {
+            // Specific pages selected
+            $pagesToPrint = $this->countPagesFromRanges($pagesInput);
+        }
+
+        Log::info("Bluetooth printing:", [
+            'file' => $filename,
+            'copies' => $order['copies'],
+            'pages_input' => $pagesInput,
+            'pages_to_print' => $pagesToPrint,
+            'paper_size' => $order['paper_size'],
+            'total_sheets' => $pagesToPrint * $order['copies']
+        ]);
+
         // Build print command
-        $printCmd = "sudo /usr/bin/lp -d EPSON_L120_Series";
+        $printCmd = "sudo /usr/bin/lp -d EPSON_L120_Series_instaprinthotspot";
         $printCmd .= " -n " . $order['copies'];
-        
+
         if ($order['color_option'] === 'grayscale') {
             $printCmd .= " -o ColorModel=Gray";
         }
-        
+
         $printCmd .= " -o media=" . $order['paper_size'];
-        
+
         if ($order['duplex'] === 'two-sided-long-edge') {
             $printCmd .= " -o sides=two-sided-long-edge";
         } elseif ($order['duplex'] === 'two-sided-short-edge') {
             $printCmd .= " -o sides=two-sided-short-edge";
         }
-        
-        if (!empty($order['pages']) && $order['pages'] !== 'All') {
-            $printCmd .= " -o page-ranges=" . escapeshellarg($order['pages']);
+
+        // Only add page-ranges if specific pages are selected
+        if (!empty($pagesInput)) {
+            $printCmd .= " -o page-ranges=" . $pagesInput;
         }
-        
+
         if ($order['fit'] === 'fit-to-page') {
             $printCmd .= " -o fit-to-page";
         }
-        
+
         $printCmd .= " " . escapeshellarg($filePath) . " 2>&1";
-        
+
         Log::info("Bluetooth print command: " . $printCmd);
         $output = shell_exec($printCmd);
-        
+
         if ($output && (str_contains(strtolower($output), 'error') || str_contains(strtolower($output), 'failed'))) {
             Log::error("Bluetooth print failed: " . $output);
             return response()->json([
@@ -655,17 +740,36 @@ class BluetoothController extends Controller
             ], 500);
         }
 
+        // Note: Dispenser was already started after payment confirmation
+        // Papers should already be dispensed by now
+
         // Log the print job
         PrintLog::create([
             'source' => 'Bluetooth',
             'file_name' => $order['file_name'],
             'copies' => $order['copies'],
-            'page_count' => $order['page_count'] ?? 1,
+            'page_count' => $pagesToPrint,
             'paper_size' => $order['paper_size'],
             'color_option' => $order['color_option'],
             'rate_per_page' => $order['rate'] ?? 0,
             'total_amount' => $order['calculated_total'],
         ]);
+
+        // ✅ Delete the file from both locations now that printing is complete
+        try {
+            $deleteResponse = Http::timeout(5)->post('http://127.0.0.1:5001/delete_file', [
+                'filename' => $filename
+            ]);
+
+            Log::info("File deletion requested:", [
+                'filename' => $filename,
+                'response' => $deleteResponse->json(),
+                'status' => $deleteResponse->status()
+            ]);
+        } catch (\Exception $e) {
+            Log::warning("Failed to delete file after printing: " . $e->getMessage());
+            // Don't fail the print job if deletion fails
+        }
 
         // Keep order in session for success page, then mark as completed
         $order['print_completed'] = true;

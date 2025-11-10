@@ -6,6 +6,21 @@
     <title>Printing Instructions</title>
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
+    <style>
+        .progress-container {
+            display: none;
+        }
+        .progress-container.show {
+            display: block;
+        }
+        .emergency-btn {
+            display: none;
+            margin-top: 1rem;
+        }
+        .emergency-btn.show {
+            display: block;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="container my-5">
@@ -39,16 +54,46 @@
                 <button id="print-btn" class="btn btn-primary btn-lg w-100">
                     <i class="bi bi-printer-fill me-2"></i>Start Printing
                 </button>
+
+                {{-- Printing Progress Section --}}
+                <div id="progress-container" class="progress-container mt-4">
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading"><i class="bi bi-hourglass-split me-2"></i>Printing in Progress</h5>
+                        <p id="progress-message" class="mb-2">Preparing to print...</p>
+                        <p id="job-info" class="mb-2 small text-muted"></p>
+                        <div class="progress" style="height: 25px;">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                0%
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Emergency Jam Button --}}
+                    <button id="emergency-jam-btn" class="btn btn-danger btn-lg w-100 emergency-btn">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency: Clear Paper Jam
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script>
+        let printJobId = null;
+        let progressInterval = null;
+        let printComplete = false;
+        const totalPages = {{ $order['page_count'] ?? 1 }};
+        const copies = {{ $order['copies'] ?? 1 }};
+        const totalSheets = totalPages * copies;
+
         document.getElementById('print-btn').addEventListener('click', function() {
             this.disabled = true;
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Printing...';
-            
+
+            // Show progress container
+            document.getElementById('progress-container').classList.add('show');
+
             fetch("{{ route('bluetooth.printJob') }}", {
                 method: 'POST',
                 headers: {
@@ -59,12 +104,8 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Redirect to success page
-                    if (data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
-                        window.location.href = "{{ route('bluetooth.success') }}";
-                    }
+                    // Start monitoring CUPS print queue
+                    startRealTimePrintMonitoring();
                 } else {
                     alert('❌ Print failed: ' + data.message);
                     location.reload();
@@ -74,6 +115,89 @@
                 console.error(err);
                 alert('❌ Print error. Please try again.');
                 location.reload();
+            });
+        });
+
+        function startRealTimePrintMonitoring() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressMessage = document.getElementById('progress-message');
+            const jobInfo = document.getElementById('job-info');
+            const emergencyBtn = document.getElementById('emergency-jam-btn');
+            let checkCount = 0;
+            let hasStartedPrinting = false;
+
+            // Show emergency button after 5 seconds
+            setTimeout(() => {
+                emergencyBtn.classList.add('show');
+            }, 5000);
+
+            // Poll CUPS status every second
+            progressInterval = setInterval(() => {
+                fetch('http://127.0.0.1:5007/print/check-complete' + (printJobId ? '/' + printJobId : ''))
+                    .then(res => res.json())
+                    .then(data => {
+                        checkCount++;
+
+                        if (data.completed && hasStartedPrinting) {
+                            // Print job is complete - auto redirect
+                            clearInterval(progressInterval);
+
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+                            progressBar.classList.remove('progress-bar-animated');
+                            progressBar.classList.add('bg-success');
+                            progressMessage.innerHTML = '<strong>✅ Printing Complete!</strong> Redirecting...';
+                            jobInfo.textContent = 'All pages have been printed successfully.';
+
+                            // Auto redirect after 2 seconds
+                            setTimeout(() => {
+                                window.location.href = "{{ route('bluetooth.success') }}";
+                            }, 2000);
+                        } else {
+                            // Still printing - update progress
+                            hasStartedPrinting = true;
+
+                            // Calculate estimated progress based on time
+                            const estimatedTime = totalSheets * 5; // 5 seconds per page
+                            const elapsed = checkCount;
+                            const progress = Math.min(95, (elapsed / estimatedTime) * 100);
+
+                            progressBar.style.width = progress + '%';
+                            progressBar.textContent = Math.floor(progress) + '%';
+
+                            if (checkCount < 3) {
+                                progressMessage.textContent = 'Sending job to printer...';
+                                jobInfo.textContent = 'Preparing print queue...';
+                            } else {
+                                progressMessage.textContent = `Printing... (${totalSheets} pages)`;
+                                jobInfo.textContent = `Job ${printJobId || 'active'} - Estimated time: ${Math.ceil(estimatedTime - elapsed)}s remaining`;
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error checking print status:', err);
+                        // Continue checking even if there's an error
+                    });
+            }, 1000); // Check every second
+        }
+
+        // Emergency Jam Button Handler
+        document.getElementById('emergency-jam-btn').addEventListener('click', function() {
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Clearing Jam...';
+
+            fetch('http://127.0.0.1:5006/emergency/clear-jam', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency: Clear Paper Jam';
+            })
+            .catch(err => {
+                console.error(err);
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency: Clear Paper Jam';
             });
         });
     </script>

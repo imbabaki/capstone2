@@ -52,10 +52,22 @@ def monitor_usb():
                     files_info = []
                     for f in pdf_files:
                         file_path = os.path.join(mount_path, f)
+                        # Count actual PDF pages using PyPDF2
+                        page_count = 1  # fallback default
+                        try:
+                            import PyPDF2
+                            with open(file_path, 'rb') as pdf_file:
+                                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                                page_count = len(pdf_reader.pages)
+                                print(f"📄 {f}: {page_count} pages")
+                        except Exception as e:
+                            print(f"⚠️ Could not count pages for {f}: {e}, defaulting to 1")
+                            page_count = 1
+
                         files_info.append({
                             "name": f,
                             "path": file_path,
-                            "pages": 1
+                            "pages": page_count
                         })
                     usb_event = {
                         "status": "inserted",

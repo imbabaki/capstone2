@@ -61,6 +61,10 @@ def dispense_papers(paper_size, count):
     target_count = count
     paper_count = 0
     paper_detected = False
+    
+    # ✅ Variables for blocking detection
+    last_activity_time = time.time()
+    motor_paused_due_to_blocking = False
 
     print(f"🟢 Dispensing {count} papers ({paper_size}) using GPIO {relay_pin}...")
 
@@ -69,22 +73,51 @@ def dispense_papers(paper_size, count):
     try:
         while motor_running:
             state = GPIO.input(sensor_pin)
+            current_time = time.time()
             print(f"Sensor: {state}, paper_detected={paper_detected}, count={paper_count}/{target_count}")
+
+            # ✅ Check if no activity for 2 seconds (paper is blocking)
+            if current_time - last_activity_time > 3.5 and not motor_paused_due_to_blocking:
+                motor_paused_due_to_blocking = True
+                GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
+                print("⚠️  No sensor activity for 2 seconds - Paper blocked! Motor stopped.")
 
             # same logic as working code — LOW = blocked
             if state == GPIO.LOW and not paper_detected:
                 paper_detected = True
+                last_activity_time = current_time  # ✅ Reset timer on activity
+                
+                # ✅ If motor was paused, resume it
+                if motor_paused_due_to_blocking:
+                    motor_paused_due_to_blocking = False
+                    GPIO.output(relay_pin, GPIO.LOW)  # Resume motor
+                    print("✅ Sensor active again - Motor resumed!")
 
             elif state == GPIO.HIGH and paper_detected:
                 paper_detected = False
                 paper_count += 1
+                last_activity_time = current_time  # ✅ Reset timer on activity
                 print(f"✅ Counted: {paper_count}/{target_count}")
+                
+                # ✅ If motor was paused, resume it
+                if motor_paused_due_to_blocking:
+                    motor_paused_due_to_blocking = False
+                    GPIO.output(relay_pin, GPIO.LOW)  # Resume motor
+                    print("✅ Sensor active again - Motor resumed!")
 
                 if paper_count >= target_count:
                     print("🛑 Target reached, stopping motor.")
                     motor_running = False
                     GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
                     break
+                else:
+                    # ✅ Stop motor for 1 second after paper is counted
+                    GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
+                    print("⏸️  Motor paused for 1 second...")
+                    time.sleep(1)
+                    last_activity_time = time.time()  # ✅ Reset timer after delay
+                    GPIO.output(relay_pin, GPIO.LOW)  # Restart motor
+                    print("▶️  Motor restarted, continuing...")
 
             time.sleep(0.02)
 
@@ -102,7 +135,7 @@ def start_dispense():
     data = request.get_json()
     paper_size = data.get("paper_size", "A4")
     copies = int(data.get("copies", 1))
-    pages_str = data.get("pages", "1")
+    pages_str = data.get("pages", "")
 
     num_pages = parse_pages(pages_str)
     target_papers = copies * num_pages

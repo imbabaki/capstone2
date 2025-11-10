@@ -199,12 +199,29 @@
                     <div id="status-processing" class="alert alert-success status-message">
                         <i class="bi bi-check-circle me-2"></i>
                         <strong>File received!</strong>
-                        <p class="mb-0 mt-2">Redirecting to print options...</p>
+                        <p class="mb-0 mt-2">Please accept or reject the file below</p>
                     </div>
 
                     <!-- Progress Area -->
                     <div id="progress-container" class="progress-container">
                         <div id="progress-area"></div>
+                    </div>
+
+                    <!-- Accept/Reject File Dialog -->
+                    <div id="file-dialog" class="alert alert-warning status-message" style="padding: 25px;">
+                        <div class="text-center">
+                            <i class="bi bi-file-earmark-pdf" style="font-size: 60px; color: #dc2626;"></i>
+                            <h4 class="mt-3 mb-2">Incoming File</h4>
+                            <p id="dialog-filename" class="fw-bold fs-5 mb-4" style="color: #0f172a;"></p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <button id="btn-reject" class="btn btn-danger btn-lg px-5">
+                                    <i class="bi bi-x-circle me-2"></i>REJECT
+                                </button>
+                                <button id="btn-accept" class="btn btn-success btn-lg px-5">
+                                    <i class="bi bi-check-circle me-2"></i>ACCEPT
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Instructions -->
@@ -434,6 +451,13 @@ socket.on("progress", (data) => {
 
 // Track the last redirected file
 let lastRedirected = null;
+let pendingFileData = null;
+
+// Accept/Reject Dialog Elements
+const fileDialog = document.getElementById('file-dialog');
+const dialogFilename = document.getElementById('dialog-filename');
+const btnAccept = document.getElementById('btn-accept');
+const btnReject = document.getElementById('btn-reject');
 
 socket.on("new_file", (data) => {
     console.log("📁 New file received:", data);
@@ -443,16 +467,51 @@ socket.on("new_file", (data) => {
     // Auto-disable Bluetooth discoverability after file received
     autoDisableBluetooth();
 
-    // Auto redirect only if it's a new file
-    if (data.redirect && lastRedirected !== data.filename) {
-        lastRedirected = data.filename;
-        console.log("🔀 Redirecting to:", data.redirect);
+    // Store file data and show accept/reject dialog
+    pendingFileData = data;
+    dialogFilename.textContent = data.filename;
+    fileDialog.classList.add('active');
 
-        // Small delay to ensure file is fully available
+    console.log("⏳ Waiting for user to accept or reject file:", data.filename);
+});
+
+// Handle Accept Button
+btnAccept.addEventListener('click', function() {
+    if (!pendingFileData) return;
+
+    console.log("✅ User accepted file:", pendingFileData.filename);
+
+    // Disable buttons
+    btnAccept.disabled = true;
+    btnReject.disabled = true;
+    btnAccept.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+
+    // Redirect to preview page
+    if (pendingFileData.redirect && lastRedirected !== pendingFileData.filename) {
+        lastRedirected = pendingFileData.filename;
+        console.log("🔀 Redirecting to:", pendingFileData.redirect);
+
         setTimeout(() => {
-            window.location.href = data.redirect;
-        }, 1500);
+            window.location.href = pendingFileData.redirect;
+        }, 500);
     }
+});
+
+// Handle Reject Button
+btnReject.addEventListener('click', function() {
+    if (!pendingFileData) return;
+
+    console.log("❌ User rejected file:", pendingFileData.filename);
+
+    // Reset UI
+    fileDialog.classList.remove('active');
+    pendingFileData = null;
+    setStatus('idle');
+
+    // Optional: Send reject notification to server (if you want to delete the file)
+    // fetch('/bluetooth/reject-file', { method: 'POST', ... });
+
+    alert('File rejected. Ready for next file.');
 });
 
 // Initialize status

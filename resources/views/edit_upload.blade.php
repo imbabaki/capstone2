@@ -174,7 +174,7 @@ use Illuminate\Support\Str;
       <!-- Left: File Preview -->
       <div class="preview">
         @if(Str::endsWith($fileUrl, '.pdf'))
-          <iframe src="{{ $fileUrl }}"></iframe>
+          <iframe src="{{ $fileUrl }}#toolbar=0"></iframe>
         @else
           <img src="{{ $fileUrl }}" alt="Preview">
         @endif
@@ -189,8 +189,8 @@ use Illuminate\Support\Str;
           <label for="copies">Copies</label>
           <input type="number" id="copies" name="copies" value="{{ $order['copies'] ?? 1 }}" min="1">
 
-          <label for="pages">Pages (e.g., 1-3,5)</label>
-          <input type="text" id="pages" name="pages" value="{{ $order['pages'] ?? '1' }}">
+          <label for="pages">Pages (leave empty for all pages)</label>
+          <input type="text" id="pages" name="pages" value="{{ $order['pages'] ?? '' }}" placeholder="All pages">
 
           <label for="color_option">Color</label>
           <select id="color_option" name="color_option">

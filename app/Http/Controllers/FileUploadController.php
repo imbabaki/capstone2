@@ -120,9 +120,9 @@ class FileUploadController extends Controller
             ], 404);
         }
 
-        $printer = $order['printer'] ?? 'EPSON_L120_Series';
+        $printer = $order['printer'] ?? 'EPSON_L120_Series_instaprinthotspot';
         $copies  = (int)($order['copies'] ?? 1);
-        $pages   = $order['pages'] ?? 1;
+        $pagesInput = trim($order['pages'] ?? 'All');
         $color   = $order['color'] ?? 'color';
         $paper   = $order['paper_size'] ?? null;
         $duplex  = $order['duplex'] ?? 'one-sided';
@@ -130,9 +130,10 @@ class FileUploadController extends Controller
 
         $cmd = ['lp', '-d', $printer, '-n', (string) max(1, $copies)];
 
-        if (!empty($pages)) {
+        // Only add page-ranges if specific pages are selected (not "All" or empty)
+        if (!empty($pagesInput) && strtolower($pagesInput) !== 'all') {
             $cmd[] = '-o';
-            $cmd[] = 'page-ranges=' . $pages;
+            $cmd[] = 'page-ranges=' . $pagesInput;
         }
 
         $cmd[] = '-o';
@@ -208,12 +209,55 @@ class FileUploadController extends Controller
         $order['color'] = $order['color'] ?? $order['color_option'] ?? null;
         $order['paid'] = false;
 
+        // Calculate page count
+        $pagesInput = trim($request->input('pages', ''));
+
+        // If empty or "All", get the actual PDF page count
+        if (empty($pagesInput) || strtolower($pagesInput) === 'all') {
+            $filePath = public_path('storage/uploads/' . $order['file_name']);
+
+            if (file_exists($filePath) && Str::endsWith($order['file_name'], '.pdf')) {
+                try {
+                    $pdf = new \Smalot\PdfParser\Parser();
+                    $document = $pdf->parseFile($filePath);
+                    $order['page_count'] = max(1, count($document->getPages()));
+                } catch (\Exception $e) {
+                    Log::warning("Failed to parse PDF: " . $e->getMessage());
+                    $order['page_count'] = 1;
+                }
+            } else {
+                $order['page_count'] = 1;
+            }
+            $order['pages'] = 'All';
+        } else {
+            // User specified specific pages - count them
+            $order['page_count'] = $this->countPagesFromRanges($pagesInput);
+            $order['pages'] = $pagesInput;
+        }
+
         Session::put('upload.order', $order);
         Session::save();
 
         return view('upload.payment', [
             'order' => $order
         ]);
+    }
+
+    private function countPagesFromRanges(?string $ranges): int
+    {
+        if (!$ranges || $ranges === 'All') return 0;
+        $total = 0;
+        foreach (explode(',', $ranges) as $part) {
+            $part = trim($part);
+            if ($part === '') continue;
+            if (strpos($part, '-') !== false) {
+                [$s, $e] = array_map('intval', explode('-', $part));
+                if ($e >= $s) $total += ($e - $s + 1);
+            } else {
+                $total += 1;
+            }
+        }
+        return $total;
     }
 
     // Handle GET requests to payment page (for page reloads/voucher applications)
@@ -521,6 +565,40 @@ class FileUploadController extends Controller
                 Log::info('Coin counter reset successfully', ['response' => $resetResponse->json()]);
             } catch (\Exception $e) {
                 Log::warning('Failed to reset coin total: ' . $e->getMessage());
+            }
+
+            // ✅ START DISPENSING PAPERS IMMEDIATELY AFTER PAYMENT
+            $pagesInput = trim($order['pages'] ?? 'All');
+            $pagesToPrint = $order['page_count'] ?? 1;
+
+            // Calculate the page string to send to dispenser
+            $dispenserPages = '';
+            if (!empty($pagesInput) && strtolower($pagesInput) !== 'all') {
+                // Specific pages selected (e.g., "1-3,5")
+                $dispenserPages = $pagesInput;
+            } else {
+                // All pages - send format "1-X" where X is total pages
+                $dispenserPages = "1-{$pagesToPrint}";
+            }
+
+            try {
+                $dispenserResponse = Http::timeout(10)->post('http://127.0.0.1:5005/start', [
+                    'paper_size' => $order['paper_size'] ?? 'A4',
+                    'copies' => $order['copies'] ?? 1,
+                    'pages' => $dispenserPages
+                ]);
+
+                Log::info("Dispenser started after payment (Upload/QR):", [
+                    'paper_size' => $order['paper_size'] ?? 'A4',
+                    'copies' => $order['copies'] ?? 1,
+                    'pages_sent' => $dispenserPages,
+                    'calculated_sheets' => $pagesToPrint * ($order['copies'] ?? 1),
+                    'response' => $dispenserResponse->json(),
+                    'status' => $dispenserResponse->status()
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to start dispenser after payment (Upload/QR): " . $e->getMessage());
+                // Don't fail the payment if dispenser fails, just log it
             }
 
             Log::info('=== UPLOAD HANDLE PAYMENT COMPLETED SUCCESSFULLY ===');

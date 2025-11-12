@@ -943,6 +943,50 @@
         updatePayment(initialCoinTotal);
       }
     });
+
+    // 3-minute inactivity timeout - redirect to start
+    let inactivityTimer;
+    const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+    function resetTimerPayment() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            console.log('3-minute inactivity timeout reached, redirecting to start...');
+            window.location.href = "{{ route('start') }}";
+        }, TIMEOUT_DURATION);
+    }
+
+    // Reset timer ONLY on meaningful user interactions (not passive scrolling/movement)
+    // Voucher input interaction
+    const voucherCodeInput = document.getElementById('voucherCode');
+    if (voucherCodeInput) {
+        voucherCodeInput.addEventListener('click', resetTimerPayment);
+    }
+
+    // Apply voucher button
+    const applyVoucherBtn = document.getElementById('apply-voucher-btn');
+    if (applyVoucherBtn) {
+        applyVoucherBtn.addEventListener('click', resetTimerPayment);
+    }
+
+    // Keyboard interactions
+    document.querySelectorAll('.keyboard-key').forEach(key => {
+        key.addEventListener('click', resetTimerPayment);
+    });
+    document.querySelectorAll('.keyboard-action-btn').forEach(btn => {
+        btn.addEventListener('click', resetTimerPayment);
+    });
+
+    // Confirm payment button
+    const confirmButtonPayment = document.getElementById('confirm-btn');
+    if (confirmButtonPayment) {
+        confirmButtonPayment.addEventListener('click', resetTimerPayment);
+    }
+
+    // Initialize timer on page load
+    resetTimerPayment();
+
+    console.log('3-minute inactivity timer initialized (resets only on button/input interactions)');
   </script>
 
   @include('partials.emergency-check')

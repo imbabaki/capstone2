@@ -1,15 +1,14 @@
 # Laravel server with multiple workers for concurrent connections
 PHP_CLI_SERVER_WORKERS=10 php artisan serve --host=0.0.0.0 --port=8000
 soketi start
-
-
-source ~/venv/bin/activate
-python3 USB_server.py
-python3 Coin_server.py
-python3 Dispenser_Server.py
-python3 emergency_jam_server.py
-python3 cups_monitor_server.py
 ./start_usb_server.sh
+
+source .venv/bin/activate
+python3 Coin_server.py &
+python3 Dispenser_Server.py &
+python3 emergency_jam_server.py &
+python3 cups_monitor_server.py &
+
 
 
 #bluetooth

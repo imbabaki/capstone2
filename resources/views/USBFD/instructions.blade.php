@@ -503,11 +503,11 @@
         <div class="content-section">
             <div class="gif-instructions">
                 <div class="gif-step">
-                    <div class="gif-step-title">STEP 1: Get Paper</div>
+                    <div class="gif-step-title">STEP 1: Get The Paper</div>
                     <img src="{{ asset('icons/Getpaper.gif') }}" alt="Get Paper">
                 </div>
                 <div class="gif-step">
-                    <div class="gif-step-title">STEP 2: Put Paper</div>
+                    <div class="gif-step-title">STEP 2: Put The Paper</div>
                     <img src="{{ asset('icons/put paper.gif') }}" alt="Put Paper in Printer">
                 </div>
             </div>

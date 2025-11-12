@@ -972,6 +972,50 @@
         }
       });
     }
+
+    // 3-minute inactivity timeout - redirect to start
+    let inactivityTimer;
+    const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+    function resetTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            console.log('3-minute inactivity timeout reached, redirecting to start...');
+            window.location.href = "{{ route('start') }}";
+        }, TIMEOUT_DURATION);
+    }
+
+    // Reset timer ONLY on meaningful user interactions (not passive scrolling/movement)
+    // Voucher input interaction
+    const voucherCodeInput = document.getElementById('voucherCode');
+    if (voucherCodeInput) {
+        voucherCodeInput.addEventListener('click', resetTimer);
+    }
+
+    // Apply voucher button
+    const applyVoucherBtn = document.getElementById('apply-voucher-btn');
+    if (applyVoucherBtn) {
+        applyVoucherBtn.addEventListener('click', resetTimer);
+    }
+
+    // Keyboard interactions
+    document.querySelectorAll('.keyboard-key').forEach(key => {
+        key.addEventListener('click', resetTimer);
+    });
+    document.querySelectorAll('.keyboard-action-btn').forEach(btn => {
+        btn.addEventListener('click', resetTimer);
+    });
+
+    // Confirm payment button
+    const confirmButton = document.getElementById('confirm-btn');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', resetTimer);
+    }
+
+    // Initialize timer on page load
+    resetTimer();
+
+    console.log('3-minute inactivity timer initialized (resets only on button/input interactions)');
   </script>
 
   @include('partials.emergency-check')

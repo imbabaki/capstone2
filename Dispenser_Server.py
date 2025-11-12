@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import RPi.GPIO as GPIO
 import time
 import threading
+import requests
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -61,10 +62,12 @@ def dispense_papers(paper_size, count):
     target_count = count
     paper_count = 0
     paper_detected = False
-    
+
     # ✅ Variables for blocking detection
     last_activity_time = time.time()
     motor_paused_due_to_blocking = False
+    total_blocked_time = 0  # Track cumulative blocked time
+    block_start_time = None  # When blocking started
 
     print(f"🟢 Dispensing {count} papers ({paper_size}) using GPIO {relay_pin}...")
 
@@ -76,20 +79,52 @@ def dispense_papers(paper_size, count):
             current_time = time.time()
             print(f"Sensor: {state}, paper_detected={paper_detected}, count={paper_count}/{target_count}")
 
-            # ✅ Check if no activity for 2 seconds (paper is blocking)
-            if current_time - last_activity_time > 3.5 and not motor_paused_due_to_blocking:
+            # ✅ Check if no activity for 2.5 seconds (paper is blocking)
+            if current_time - last_activity_time > 2.5 and not motor_paused_due_to_blocking:
                 motor_paused_due_to_blocking = True
+                block_start_time = current_time  # Mark when blocking started
                 GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
-                print("⚠️  No sensor activity for 2 seconds - Paper blocked! Motor stopped.")
+                print("⚠️  No sensor activity for 2.5 seconds - Paper blocked! Motor stopped.")
+
+            # ✅ Check if blocked for 20 seconds total - trigger temporary disable
+            if motor_paused_due_to_blocking and block_start_time:
+                blocked_duration = current_time - block_start_time
+                total_blocked_time += 0.02  # Add polling interval
+
+                if blocked_duration > 20:
+                    print("🚨 CRITICAL: Blocked for 20 seconds! Triggering temporary disable mechanism...")
+                    motor_running = False
+                    GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
+
+                    # ✅ Trigger temporary disable mechanism via Laravel API
+                    try:
+                        response = requests.post(
+                            'http://127.0.0.1:8000/api/emergency/temporary-disable',
+                            json={
+                                'reason': 'Paper dispenser blocked for 20 seconds',
+                                'component': 'dispenser',
+                                'paper_size': paper_size
+                            },
+                            timeout=5
+                        )
+                        if response.status_code == 200:
+                            print("✅ Temporary disable triggered successfully")
+                        else:
+                            print(f"⚠️ Failed to trigger temporary disable: {response.status_code}")
+                    except Exception as e:
+                        print(f"❌ Error triggering temporary disable: {e}")
+
+                    break
 
             # same logic as working code — LOW = blocked
             if state == GPIO.LOW and not paper_detected:
                 paper_detected = True
                 last_activity_time = current_time  # ✅ Reset timer on activity
-                
+
                 # ✅ If motor was paused, resume it
                 if motor_paused_due_to_blocking:
                     motor_paused_due_to_blocking = False
+                    block_start_time = None  # Clear block timer
                     GPIO.output(relay_pin, GPIO.LOW)  # Resume motor
                     print("✅ Sensor active again - Motor resumed!")
 
@@ -98,10 +133,11 @@ def dispense_papers(paper_size, count):
                 paper_count += 1
                 last_activity_time = current_time  # ✅ Reset timer on activity
                 print(f"✅ Counted: {paper_count}/{target_count}")
-                
+
                 # ✅ If motor was paused, resume it
                 if motor_paused_due_to_blocking:
                     motor_paused_due_to_blocking = False
+                    block_start_time = None  # Clear block timer
                     GPIO.output(relay_pin, GPIO.LOW)  # Resume motor
                     print("✅ Sensor active again - Motor resumed!")
 

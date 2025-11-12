@@ -260,6 +260,12 @@
             height: 100%;
         }
 
+        /* When no voucher, center and enlarge the progress section */
+        .progress-container.show.no-voucher {
+            justify-content: center;
+            align-items: center;
+        }
+
         .progress-left {
             flex: 1;
             display: flex;
@@ -274,10 +280,22 @@
             align-items: center;
         }
 
+        /* Larger progress section when no voucher */
+        .progress-container.no-voucher .progress-left {
+            max-width: 70vw;
+            padding: 4vh 4vw;
+            gap: 4vh;
+        }
+
         .progress-right {
             flex: 1;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Hide right side when no voucher */
+        .progress-container.no-voucher .progress-right {
+            display: none;
         }
 
         .progress-alert {
@@ -289,6 +307,13 @@
             width: 100%;
         }
 
+        /* Larger alert box when no voucher */
+        .progress-container.no-voucher .progress-alert {
+            padding: 4vh 4vw;
+            border-radius: 1.5vh;
+            border: 3px solid #3b82f6;
+        }
+
         .progress-title {
             font-size: 1.8vh;
             font-weight: 700;
@@ -297,17 +322,35 @@
             text-shadow: 0 0 1vh rgba(56, 189, 248, 0.6);
         }
 
+        /* Larger text when no voucher */
+        .progress-container.no-voucher .progress-title {
+            font-size: 3.5vh;
+            margin-bottom: 2vh;
+        }
+
         .progress-message {
             font-size: 1.3vh;
             margin-bottom: 0.8vh;
             color: #94a3b8;
         }
 
+        /* Larger message text when no voucher */
+        .progress-container.no-voucher .progress-message {
+            font-size: 2.5vh;
+            margin-bottom: 1.5vh;
+        }
+
         .progress-bar-container {
             background: rgba(0,0,0,0.2);
-            border-radius: 0.8vh;
-            height: 3vh;
+            border-radius: 0.6vh;
+            height: 2.5vh;
             overflow: hidden;
+        }
+
+        /* Larger progress bar when no voucher */
+        .progress-container.no-voucher .progress-bar-container {
+            height: 5vh;
+            border-radius: 1vh;
         }
 
         .progress-bar-fill {
@@ -318,8 +361,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8vh;
+            font-size: 1.4vh;
             font-weight: 700;
+        }
+
+        /* Larger progress bar text when no voucher */
+        .progress-container.no-voucher .progress-bar-fill {
+            font-size: 3vh;
         }
 
         .continue-print-btn {
@@ -334,6 +382,13 @@
             transition: all 0.2s;
             width: 100%;
             text-shadow: 0 0 1vh rgba(34, 197, 94, 0.6);
+        }
+
+        /* Larger button when no voucher */
+        .progress-container.no-voucher .continue-print-btn {
+            padding: 4vh 4vw;
+            font-size: 4vh;
+            border-radius: 1.5vh;
         }
         .continue-print-btn:hover {
             transform: translateY(-2px);
@@ -427,11 +482,11 @@
         <div class="content-section">
             <div class="gif-instructions">
                 <div class="gif-step">
-                    <div class="gif-step-title">STEP 1: Get Paper</div>
+                    <div class="gif-step-title">STEP 1: Get The Paper</div>
                     <img src="{{ asset('icons/Getpaper.gif') }}" alt="Get Paper">
                 </div>
                 <div class="gif-step">
-                    <div class="gif-step-title">STEP 2: Put Paper</div>
+                    <div class="gif-step-title">STEP 2: Put The Paper</div>
                     <img src="{{ asset('icons/put paper.gif') }}" alt="Put Paper in Printer">
                 </div>
             </div>
@@ -494,6 +549,7 @@
         const totalPages = {{ $order['page_count'] ?? 1 }};
         const copies = {{ $order['copies'] ?? 1 }};
         const totalSheets = totalPages * copies;
+        const hasVoucher = {{ !empty($order['change_voucher_code']) ? 'true' : 'false' }};
 
         document.getElementById('print-btn').addEventListener('click', function() {
             this.disabled = true;
@@ -504,7 +560,13 @@
             this.classList.add('hide');
 
             // Show progress container
-            document.getElementById('progress-container').classList.add('show');
+            const progressContainer = document.getElementById('progress-container');
+            progressContainer.classList.add('show');
+
+            // Add no-voucher class if there's no voucher
+            if (!hasVoucher) {
+                progressContainer.classList.add('no-voucher');
+            }
 
             // Send print request
             fetch("{{ route('bluetooth.printJob') }}", {
@@ -606,6 +668,35 @@
                 this.textContent = '▶️ CONTINUE PRINT';
             });
         });
+
+        // 3-minute inactivity timeout - redirect to start
+        let inactivityTimer;
+        const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                console.log('3-minute inactivity timeout reached, redirecting to start...');
+                window.location.href = "{{ route('start') }}";
+            }, TIMEOUT_DURATION);
+            console.log('Inactivity timer reset - will redirect in 3 minutes');
+        }
+
+        // Reset timer ONLY on meaningful user interactions
+        const printBtnInstruction = document.getElementById('print-btn');
+        if (printBtnInstruction) {
+            printBtnInstruction.addEventListener('click', resetInactivityTimer);
+        }
+
+        const continuePrintBtn = document.getElementById('continue-print-btn');
+        if (continuePrintBtn) {
+            continuePrintBtn.addEventListener('click', resetInactivityTimer);
+        }
+
+        // Initialize timer on page load
+        resetInactivityTimer();
+
+        console.log('3-minute inactivity timer initialized on Bluetooth instruction page');
     </script>
 
   @include('partials.emergency-check')

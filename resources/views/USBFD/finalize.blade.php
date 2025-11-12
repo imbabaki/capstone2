@@ -63,6 +63,33 @@
             background-color: #218838;
         }
 
+        .back-button {
+            background: linear-gradient(145deg, #06b6d4, #0891b2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+            border: 2px solid #0e7490;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(145deg, #0891b2, #0e7490);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -89,7 +116,12 @@
         </div>
 
         <div class="summary">
-            <h3>Print Summary</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Print Summary</h3>
+                <a href="{{ route('start') }}" class="back-button" id="backButton">
+                    ← BACK
+                </a>
+            </div>
 
             <label>File Name</label>
             <div class="readonly-field">{{ $file }}</div>
@@ -116,6 +148,53 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // 3-minute inactivity timeout - redirect to start
+        let inactivityTimer;
+        const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+        function resetTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                console.log('3-minute inactivity timeout reached, redirecting to start...');
+                window.location.href = "{{ route('start') }}";
+            }, TIMEOUT_DURATION);
+            console.log('Timer reset - will redirect in 3 minutes');
+        }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('USB Finalize page loaded - initializing 3-minute inactivity timer');
+
+            // Reset timer ONLY on meaningful user interactions (not passive scrolling/movement)
+            // This page has a Print button as the main interaction
+            const printButton = document.querySelector('button[type="submit"]');
+            if (printButton) {
+                printButton.addEventListener('click', function() {
+                    console.log('Print button clicked - resetting timer');
+                    resetTimer();
+                });
+                console.log('Print button listener attached');
+            } else {
+                console.error('Print button not found!');
+            }
+
+            // Back button
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', function() {
+                    console.log('Back button clicked - resetting timer');
+                    resetTimer();
+                });
+                console.log('Back button listener attached');
+            }
+
+            // Initialize timer on page load
+            resetTimer();
+            console.log('3-minute inactivity timer initialized (resets only on button interactions)');
+        });
+    </script>
 
   @include('partials.emergency-check')
 </body>

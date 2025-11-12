@@ -420,6 +420,33 @@ use Illuminate\Support\Str;
       background: #16a34a;
       transform: translateY(-2px);
     }
+
+    .back-button {
+      background: linear-gradient(145deg, #06b6d4, #0891b2);
+      color: white;
+      padding: 1.2vh 2vw;
+      border-radius: 0.8vh;
+      font-size: 2vh;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5vw;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+      border: 2px solid #0e7490;
+      text-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+    }
+
+    .back-button:hover {
+      background: linear-gradient(145deg, #0891b2, #0e7490);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.5);
+    }
+
+    .back-button:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -482,7 +509,12 @@ use Illuminate\Support\Str;
 
       <!-- Right: Print Options -->
       <div class="options">
-        <h3>Print Settings</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5vh;">
+          <h3 style="margin: 0;">Print Settings</h3>
+          <a href="{{ route('start') }}" class="back-button" id="backButton">
+            ← BACK
+          </a>
+        </div>
         <form action="{{ route('upload.payment') }}" method="POST">
           @csrf
           <input type="hidden" name="file_name" value="{{ $filename }}">
@@ -711,7 +743,55 @@ use Illuminate\Support\Str;
     } else {
       console.error('PDF wrapper not found!');
     }
+
+    // 3-minute inactivity timeout - redirect to start
+    let inactivityTimer;
+    const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+    function resetTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            console.log('3-minute inactivity timeout reached, redirecting to start...');
+            window.location.href = "{{ route('start') }}";
+        }, TIMEOUT_DURATION);
+    }
+
+    // Reset timer ONLY on meaningful user interactions (not passive scrolling/movement)
+    // Clicks on buttons, dropdowns, form elements
+    document.getElementById('paper_size').addEventListener('click', resetTimer);
+    document.getElementById('paper_size').addEventListener('change', resetTimer);
+    document.getElementById('color_option').addEventListener('click', resetTimer);
+    document.getElementById('color_option').addEventListener('change', resetTimer);
+    document.getElementById('pages').addEventListener('click', resetTimer);
+
+    // Number input buttons
+    document.querySelectorAll('.number-btn').forEach(btn => {
+        btn.addEventListener('click', resetTimer);
+    });
+
+    // Keyboard interactions
+    document.querySelectorAll('.keyboard-key').forEach(key => {
+        key.addEventListener('click', resetTimer);
+    });
+    document.querySelectorAll('.keyboard-action-btn').forEach(btn => {
+        btn.addEventListener('click', resetTimer);
+    });
+
+    // Form submission button
+    document.querySelector('.proceed-button').addEventListener('click', resetTimer);
+
+    // Back button
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', resetTimer);
+    }
+
+    // Initialize timer on page load
+    resetTimer();
+
+    console.log('3-minute inactivity timer initialized (resets only on button/input interactions)');
   </script>
 
+  @include('partials.emergency-check')
 </body>
 </html>

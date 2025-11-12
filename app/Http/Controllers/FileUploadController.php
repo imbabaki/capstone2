@@ -669,6 +669,27 @@ class FileUploadController extends Controller
                 ->with('error', 'Please complete printing first.');
         }
 
+        // Delete the uploaded file after print is completed
+        if (!empty($order['file_name'])) {
+            $filePath = public_path('storage/uploads/' . $order['file_name']);
+
+            if (File::exists($filePath)) {
+                try {
+                    File::delete($filePath);
+                    Log::info('QR uploaded file deleted after successful print', [
+                        'file_name' => $order['file_name'],
+                        'path' => $filePath
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to delete uploaded file', [
+                        'file_name' => $order['file_name'],
+                        'path' => $filePath,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
         // Clear session after displaying success
         Session::forget('upload.order');
         Session::save();

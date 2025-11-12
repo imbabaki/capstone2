@@ -540,6 +540,7 @@
           <button class="keyboard-key" onclick="addChar('B')">B</button>
           <button class="keyboard-key" onclick="addChar('N')">N</button>
           <button class="keyboard-key" onclick="addChar('M')">M</button>
+          <button class="keyboard-key" onclick="addChar('-')">-</button>
           <button class="keyboard-key wide" onclick="backspace()">⌫ DEL</button>
         </div>
       </div>
@@ -582,10 +583,6 @@
         <div class="detail-row">
           <span class="detail-label">Paper Size</span>
           <span class="detail-value">{{ $order['paper_size'] ?? 'A4' }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Duplex</span>
-          <span class="detail-value">{{ ucfirst(str_replace('-', ' ', $order['duplex'] ?? 'one-sided')) }}</span>
         </div>
       </div>
     </div>
@@ -715,7 +712,7 @@
     function applyVoucher() {
       const code = document.getElementById('voucherCode').value.trim();
       const msgEl = document.getElementById('voucherMessage');
-      
+
       if (!code) {
         msgEl.innerHTML = '<div class="alert alert-danger">Please enter a voucher code</div>';
         return;
@@ -723,11 +720,35 @@
 
       msgEl.innerHTML = '<div class="alert alert-info">Checking voucher...</div>';
 
-      // TODO: Send AJAX request to Laravel backend to validate voucher
-      // For now, just a demo
-      setTimeout(() => {
-        msgEl.innerHTML = '<div class="alert alert-danger">Voucher validation not yet implemented</div>';
-      }, 1000);
+      fetch("{{ route('usbfd.applyVoucher') }}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          code: code,
+          source: 'usbfd'
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          msgEl.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+
+          // Reload page to update totals
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+        } else {
+          msgEl.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+        }
+      })
+      .catch(err => {
+        console.error('Voucher application error:', err);
+        msgEl.innerHTML = '<div class="alert alert-danger">Failed to apply voucher. Please try again.</div>';
+      });
     }
 
     // --- Confirm Payment Button with Dispenser ---
@@ -918,5 +939,6 @@
     });
   </script>
 
+  @include('partials.emergency-check')
 </body>
 </html>

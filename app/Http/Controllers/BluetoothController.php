@@ -740,6 +740,13 @@ class BluetoothController extends Controller
             ], 500);
         }
 
+        // Extract job ID from lp output (format: "request id is PRINTER-JOBID")
+        $jobId = null;
+        if ($output && preg_match('/request id is .+-(\d+)/i', $output, $matches)) {
+            $jobId = $matches[1];
+            Log::info('Extracted job ID: ' . $jobId);
+        }
+
         // Note: Dispenser was already started after payment confirmation
         // Papers should already be dispensed by now
 
@@ -771,7 +778,7 @@ class BluetoothController extends Controller
             // Don't fail the print job if deletion fails
         }
 
-        // Keep order in session for success page, then mark as completed
+        // Mark as completed for session (monitoring will determine when to redirect)
         $order['print_completed'] = true;
         Session::put('bluetooth.order', $order);
         Session::save();
@@ -780,8 +787,26 @@ class BluetoothController extends Controller
             'success' => true,
             'message' => 'Print job sent successfully',
             'output' => $output,
-            'redirect' => route('bluetooth.success')
+            'job_id' => $jobId
         ]);
+    }
+
+    public function markCompleted(Request $request)
+    {
+        $order = Session::get('bluetooth.order');
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'No order found'], 404);
+        }
+
+        // Mark as completed
+        $order['print_completed'] = true;
+        Session::put('bluetooth.order', $order);
+        Session::save();
+
+        Log::info('Bluetooth print marked as completed');
+
+        return response()->json(['success' => true]);
     }
 
     public function success()

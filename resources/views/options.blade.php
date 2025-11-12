@@ -180,5 +180,6 @@
       </div>
     </div>
   </div>
+  @include('partials.emergency-check')
 </body>
 </html>

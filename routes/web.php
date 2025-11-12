@@ -14,12 +14,50 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Admin\SalesReportController;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\VoucherManagementController;
+use App\Http\Controllers\Admin\VoucherSettingController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/admin/sales-report', [App\Http\Controllers\Admin\SalesReportController::class, 'index'])->name('admin.sales.report');
+
+// Admin Authentication Routes (No middleware)
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+
+// Emergency Status Check API (No middleware - needs to be accessible during shutdown)
+Route::get('/api/emergency-status', [DashboardController::class, 'checkEmergencyStatus'])->name('api.emergency.status');
+
+// Protected Admin Routes (Requires admin middleware)
+Route::middleware(['admin'])->group(function () {
+    // Dashboard
+    Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard.alt');
+
+    // Emergency Shutdown
+    Route::post('/admin/emergency-shutdown/toggle', [DashboardController::class, 'toggleEmergencyShutdown'])->name('admin.emergency.toggle');
+
+    // Sales Report
+    Route::get('/admin/sales-report', [SalesReportController::class, 'index'])->name('admin.sales.report');
+
+    // Print Settings
+    Route::resource('admin/print-settings', PrintSettingController::class);
+    Route::get('/admin/print-settings', [PrintSettingController::class, 'index'])->name('admin.print-settings.index');
+
+    // Voucher Management
+    Route::get('/admin/vouchers', [VoucherManagementController::class, 'index'])->name('admin.vouchers.index');
+    Route::get('/admin/vouchers/generate', [VoucherManagementController::class, 'showGenerateForm'])->name('admin.vouchers.generate');
+    Route::post('/admin/vouchers/generate', [VoucherManagementController::class, 'generateManual'])->name('admin.vouchers.generate.store');
+
+    // Voucher Settings
+    Route::get('/admin/voucher-settings', [VoucherSettingController::class, 'index'])->name('admin.voucher.settings');
+    Route::post('/admin/voucher-settings', [VoucherSettingController::class, 'update'])->name('admin.voucher.settings.update');
+});
 
 // Start screen
 Route::get('/', function () {
@@ -55,6 +93,7 @@ Route::post('/upload/handle-payment', [FileUploadController::class, 'handlePayme
 // Instructions and printing
 Route::get('/upload/instructions', [FileUploadController::class, 'instruction'])->name('upload.instructions');
 Route::post('/upload/print', [FileUploadController::class, 'doFinalPrint'])->name('upload.print');
+Route::post('/upload/mark-completed', [FileUploadController::class, 'markCompleted'])->name('upload.markCompleted');
 
 // Success and utilities
 Route::get('/upload/success', [FileUploadController::class, 'success'])->name('upload.success');
@@ -81,10 +120,12 @@ Route::get('/bluetooth/payment', [BluetoothController::class, 'paymentView'])->n
 // Voucher and payment handling
 Route::post('/bluetooth/apply-voucher', [BluetoothController::class, 'applyVoucher'])->name('bluetooth.applyVoucher');
 Route::post('/bluetooth/handle-payment', [BluetoothController::class, 'handlePayment'])->name('bluetooth.handlePayment');
+Route::post('/usbfd/apply-voucher', [USBController::class, 'applyVoucher'])->name('usbfd.applyVoucher');
 
 // Instruction and printing
 Route::get('/bluetooth/instruction', [BluetoothController::class, 'instruction'])->name('bluetooth.instruction');
 Route::post('/bluetooth/print-job', [BluetoothController::class, 'printJob'])->name('bluetooth.printJob');
+Route::post('/bluetooth/mark-completed', [BluetoothController::class, 'markCompleted'])->name('bluetooth.markCompleted');
 Route::get('/bluetooth/success', [BluetoothController::class, 'success'])->name('bluetooth.success');
 Route::get('/bluetooth/complete', [BluetoothController::class, 'complete'])->name('bluetooth.complete');
 
@@ -97,6 +138,7 @@ Route::post('/usbfd/process-payment', [USBController::class, 'processPayment'])-
 Route::post('/usbfd/payment', [USBController::class, 'handlePayment'])->name('usbfd.payment.handle');
 Route::get('/usbfd/instruction', [USBController::class, 'instruction'])->name('usbfd.instruction');
 Route::post('/usb/print', [USBController::class, 'doFinalPrint'])->name('usb.print');
+Route::post('/usb/mark-completed', [USBController::class, 'markCompleted'])->name('usb.markCompleted');
 Route::get('/USBFD/success', [USBController::class, 'success'])->name('usb.success');
 Route::get('/USBFD/preview/{filepath}', [USBController::class, 'preview'])
     ->where('filepath', '.*')
@@ -114,22 +156,10 @@ Route::get('/coin/total', function () {
         return response()->json(['total' => 0]);
     }
 });
-// Manual voucher generation
-Route::get('/admin/vouchers/generate', [App\Http\Controllers\Admin\VoucherManagementController::class, 'showGenerateForm'])->name('admin.vouchers.generate');
-Route::post('/admin/vouchers/generate', [App\Http\Controllers\Admin\VoucherManagementController::class, 'generateManual'])->name('admin.vouchers.generate.store');
 
-// Voucher routes
+// Voucher routes (public)
 Route::get('/voucher/check', [App\Http\Controllers\VoucherController::class, 'check'])->name('voucher.check');
 Route::post('/voucher/apply', [App\Http\Controllers\VoucherController::class, 'apply'])->name('voucher.apply');
-
-// Admin voucher management
-Route::get('/admin/voucher-settings', [App\Http\Controllers\Admin\VoucherSettingController::class, 'index'])->name('admin.voucher.settings');
-Route::post('/admin/voucher-settings', [App\Http\Controllers\Admin\VoucherSettingController::class, 'update'])->name('admin.voucher.settings.update');
-Route::get('/admin/vouchers', [App\Http\Controllers\Admin\VoucherManagementController::class, 'index'])->name('admin.vouchers.index');
-
-// Admin Pricing
-Route::resource('admin/print-settings', PrintSettingController::class);
-Route::get('/admin/print-settings', [PrintSettingController::class, 'index'])->name('admin.print-settings.index');
 
 // Realtime USB Flash drive detection
 Route::get('/usb-check', function () {

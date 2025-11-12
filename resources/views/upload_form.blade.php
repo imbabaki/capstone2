@@ -62,5 +62,6 @@
         });
     });
     </script>
+  @include('partials.emergency-check')
 </body>
 </html>

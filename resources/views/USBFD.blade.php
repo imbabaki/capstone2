@@ -226,12 +226,49 @@
     margin-bottom: 1.5vh;
   }
 
+  /* Wrapper for iframe with hidden scrollbar */
+  .pdf-wrapper {
+    flex: 1;
+    width: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    border: 2px solid #334155;
+    border-radius: 1vh;
+    background: white;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* Hide scrollbar in wrapper */
+  .pdf-wrapper::-webkit-scrollbar {
+    display: none;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .pdf-wrapper {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .preview iframe {
     width: 100%;
-    flex: 1;
-    border: 2px solid #334155;
+    height: 100%;
+    min-height: 100%;
+    border: none;
     background: white;
-    border-radius: 1vh;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    touch-action: none;
   }
 
   .options {
@@ -257,52 +294,74 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    gap: 1vh;
+    justify-content: space-between;
+    gap: 0.5vh;
   }
 
   label {
-    font-size: 2.4vh;
+    font-size: 1.8vh;
     font-weight: 600;
     color: #94a3b8;
+    margin-bottom: 0.2vh;
+    margin-top: 0.2vh;
   }
 
   select, input[type="text"], input[type="number"] {
     width: 100%;
     border-radius: 1vh;
-    border: 2px solid #334155;
-    padding: 1.5vh 1.5vw;
-    font-size: 3vh;
-    font-weight: 600;
+    border: 3px solid #334155;
+    padding: 2vh 2vw;
+    font-size: 3.5vh;
+    font-weight: 700;
     background: #1e293b;
     color: #e2e8f0;
     transition: 0.3s ease;
     cursor: pointer;
+    min-height: 7vh;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2vw center;
+    background-size: 3vh;
+    padding-right: 6vw;
   }
 
   select:focus, input:focus {
     outline: none;
     border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14,165,233,0.3);
+    border-width: 3px;
+    box-shadow: 0 0 0 4px rgba(14,165,233,0.4);
   }
 
   .number-input-wrapper {
     display: flex;
     align-items: center;
-    gap: 1vw;
+    gap: 1.5vw;
+  }
+
+  .number-input-wrapper input {
+    flex: 1;
+    text-align: center;
   }
 
   .number-btn {
-    width: 8vw;
+    width: 10vw;
     height: 7vh;
+    min-width: 55px;
     background: linear-gradient(145deg,#334155,#1e293b);
-    border: 2px solid #475569;
-    border-radius: 0.8vh;
+    border: 3px solid #475569;
+    border-radius: 1vh;
     color: #e2e8f0;
     font-size: 5vh;
     cursor: pointer;
     font-weight: 900;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
 
   .number-btn:hover {
@@ -310,14 +369,23 @@
     border-color: #0ea5e9;
   }
 
+  /* Make select option text bigger */
+  select option {
+    font-size: 3.5vh;
+    padding: 2vh;
+    background: #1e293b;
+    color: #e2e8f0;
+  }
+
   #totalAmount {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     font-weight: 900;
     color: white;
     font-size: 3vh;
-    padding: 1.5vh 1.5vw;
+    padding: 1.8vh 2vw;
     text-align: center;
-    border: 2px solid #ea580c;
+    border: 3px solid #ea580c;
+    min-height: 7vh;
   }
 
   .proceed-button {
@@ -325,13 +393,14 @@
     border: none;
     border-radius: 1vh;
     color: white;
-    font-size: 4vh;
+    font-size: 3.8vh;
     font-weight: 900;
-    padding: 2vh;
-    margin-top: auto;
+    padding: 1.8vh;
+    margin-top: 0.5vh;
     cursor: pointer;
     transition: 0.3s ease;
     box-shadow: 0 4px 12px rgba(34,197,94,0.4);
+    min-height: 7.5vh;
   }
 
   .proceed-button:hover {
@@ -554,7 +623,9 @@
       <div id="pdfPreview" style="display:none;" class="container">
         <div class="preview">
           <h3>PDF Preview</h3>
-          <iframe id="pdfViewer" src=""></iframe>
+          <div class="pdf-wrapper" id="pdfWrapper">
+            <iframe id="pdfViewer" src="" scrolling="no" frameborder="0"></iframe>
+          </div>
         </div>
 
         <div class="options">
@@ -564,6 +635,7 @@
             <input type="hidden" name="file" id="selectedFileName">
             <input type="hidden" name="file_path" id="selectedPDFPath">
             <input type="hidden" name="pages" id="hidden_pages">
+            <input type="hidden" name="pdf_total_pages" id="hidden_pdf_total_pages" value="1">
             <input type="hidden" name="copies" id="hidden_copies" value="1">
             <input type="hidden" name="paper_size" id="hidden_paper_size" value="A4">
             <input type="hidden" name="color" id="hidden_color" value="grayscale">
@@ -594,12 +666,6 @@
               <option value="grayscale">Black&White</option>
             </select>
 
-            <label for="fit">Scale</label>
-            <select id="fit">
-              <option value="none">Actual size</option>
-              <option value="fit-to-page">Fit to page</option>
-            </select>
-
             <label>Total Price</label>
             <input type="text" id="totalAmount" readonly>
 
@@ -612,11 +678,12 @@
 
  <script>
   const prices = @json($pricing ?? []);
+  console.log('💰 Pricing data loaded:', prices);
+
   const paperSize = document.getElementById('paper_size');
   const colorSel = document.getElementById('color_option');
   const copiesEl = document.getElementById('copies');
   const pagesEl = document.getElementById('pages');
-  const fitEl = document.getElementById('fit');
   const totalAmount = document.getElementById('totalAmount');
   const hiddenTotal = document.getElementById('calculated_total');
   const fileNameH = document.getElementById('selectedFileName');
@@ -629,6 +696,8 @@
 
   let keyboardValue = '';
   let currentPdfTotalPages = 1;
+
+  console.log('📱 USB Page initialized');
 
   // 🧮 Parse page ranges (returns number of pages to print)
   function parsePageRange(range, defaultPages) {
@@ -687,8 +756,82 @@
     pdfListEl.style.display = 'none';
     usbUI.style.display = 'block';
     pdfPreview.style.display = 'flex';
-    // Add #toolbar=0 to hide PDF toolbar
-    document.getElementById('pdfViewer').src = previewUrl + '#toolbar=0';
+
+    // Set the hidden field for total pages
+    document.getElementById('hidden_pdf_total_pages').value = pdfPages;
+
+    const iframe = document.getElementById('pdfViewer');
+    const wrapper = document.getElementById('pdfWrapper');
+
+    // Set iframe height based on page count (approximate 11 inches per page at 96 DPI)
+    const estimatedHeight = pdfPages * 1056; // 11 inches * 96 DPI
+    iframe.style.height = estimatedHeight + 'px';
+
+    // Load PDF without toolbar and with fit to width
+    iframe.src = previewUrl + '#view=FitH&toolbar=0&navpanes=0&scrollbar=0';
+
+    // Enable simple touch/mouse scrolling for single-touch touchscreens
+    let isDragging = false;
+    let startY = 0;
+    let startScrollTop = 0;
+
+    // Handle both touch and mouse events for compatibility
+    const startDrag = (clientY) => {
+      isDragging = true;
+      startY = clientY;
+      startScrollTop = wrapper.scrollTop;
+    };
+
+    const doDrag = (clientY) => {
+      if (!isDragging) return;
+      const deltaY = startY - clientY;
+      wrapper.scrollTop = startScrollTop + deltaY;
+    };
+
+    const endDrag = () => {
+      isDragging = false;
+    };
+
+    // Touch events for touchscreen
+    wrapper.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startDrag(e.touches[0].clientY);
+    }, { passive: false });
+
+    wrapper.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        doDrag(e.touches[0].clientY);
+      }
+    }, { passive: false });
+
+    wrapper.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      endDrag();
+    }, { passive: false });
+
+    // Mouse events for testing on desktop
+    wrapper.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      startDrag(e.clientY);
+    });
+
+    wrapper.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        doDrag(e.clientY);
+      }
+    });
+
+    wrapper.addEventListener('mouseup', (e) => {
+      e.preventDefault();
+      endDrag();
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+      endDrag();
+    });
+
     fileNameH.value = fileName;
     filePathH.value = realPath;
     pagesEl.value = ''; // blank = auto total pages
@@ -746,7 +889,7 @@
   pagesEl.addEventListener('touchstart', (e) => { e.preventDefault(); showKeyboard(); });
 
   // 🔁 Recalculate when paper size or color changes
-  [paperSize, colorSel, fitEl].forEach(el => {
+  [paperSize, colorSel].forEach(el => {
     el?.addEventListener('change', () => calculateTotal(currentPdfTotalPages));
   });
 
@@ -757,7 +900,7 @@
     document.getElementById('hidden_paper_size').value = paperSize.value || 'A4';
     document.getElementById('hidden_color').value = colorSel.value || 'grayscale';
     document.getElementById('hidden_duplex').value = 'one-sided';
-    document.getElementById('hidden_fit').value = fitEl.value || 'none';
+    document.getElementById('hidden_fit').value = 'none'; // Always actual size
   });
 
   // 🖥️ Initial setup
@@ -782,40 +925,51 @@
     function connectStream() {
       if (evtSource) try { evtSource.close(); } catch(_) {}
       const url = STREAM_URLS[currentStreamIndex];
-      console.log('Connecting USB stream to', url);
+      console.log('🔌 Connecting USB stream to', url);
       evtSource = new EventSource(url);
 
-      evtSource.onopen = () => console.log('USB SSE connected');
+      evtSource.onopen = () => console.log('✅ USB SSE connected to', url);
       evtSource.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
+          console.log('📡 USB SSE message received:', data);
           if (data.status === 'inserted') {
             const files = data.files || [];
+            console.log(`📂 Found ${files.length} PDF files`);
             renderFileList(files);
           } else if (data.status === 'removed') {
+            console.log('❌ USB removed');
             showDefaultUI();
           }
-        } catch {}
+        } catch(err) {
+          console.error('❌ Failed to parse SSE data:', err);
+        }
       };
-      evtSource.onerror = () => {
+      evtSource.onerror = (err) => {
+        console.error('❌ USB SSE error:', err);
+        console.log(`🔄 Retrying with URL index ${(currentStreamIndex + 1) % STREAM_URLS.length}`);
         currentStreamIndex = (currentStreamIndex + 1) % STREAM_URLS.length;
         setTimeout(connectStream, 2000);
       };
     }
 
     function renderFileList(files) {
+      console.log('🖼️ Rendering file list with', files.length, 'files');
+
       if (chooseFileHeader) {
         chooseFileHeader.style.display = 'block';
       }
 
       pdfListEl.innerHTML = '';
       if (files.length === 0) {
+        console.log('⚠️ No PDF files found');
         pdfListEl.innerHTML = '<li style="grid-column: 1/-1; text-align:center;">No PDF files found on USB drive.</li>';
         defaultUI.style.display = 'none';
         usbUI.style.display = 'block';
         return;
       }
       files.forEach((f) => {
+        console.log(`📄 Adding file: ${f.name} (${f.pages} pages)`);
         const li = document.createElement('li');
         li.className = 'pdf-item';
         li.setAttribute('data-path', f.path || '');
@@ -838,6 +992,7 @@
       defaultUI.style.display = 'none';
       usbUI.style.display = 'block';
       pdfPreview.style.display = 'none';
+      console.log('✅ File list rendered successfully');
     }
 
     function showDefaultUI() {

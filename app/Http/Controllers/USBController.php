@@ -134,6 +134,7 @@ public function processPayment(Request $request)
         'file_path' => 'required|string',
         'copies' => 'required|integer|min:1',
         'pages' => 'nullable|string',
+        'pdf_total_pages' => 'nullable|integer|min:1',
         'color' => 'required|in:color,grayscale',
         'paper_size' => 'required|string',
         'total' => 'required|numeric|min:0',
@@ -149,43 +150,58 @@ public function processPayment(Request $request)
     $paperSize = $request->input('paper_size');
     $color = $request->input('color');
     $rate = $this->getRatePerPage($paperSize, $color) ?? 0;
-    
+
+    // Get the total pages in the PDF (from frontend which got it from USB server)
+    $pdfTotalPages = (int) $request->input('pdf_total_pages', 1);
+
     // Count pages
     $pagesInput = trim($request->input('pages', ''));
 
-    // If empty or "All", get the actual PDF page count
+    // If empty or "All", use the total page count from the PDF
     if (empty($pagesInput) || strtolower($pagesInput) === 'all') {
-        try {
-            $parser = new Parser();
-            $pdf = $parser->parseFile($filePath);
-            $pageCount = max(1, count($pdf->getPages()));
-        } catch (\Throwable $e) {
-            $pageCount = 1;
-        }
+        $pageCount = $pdfTotalPages;
         $pagesInput = 'All';
+
+        Log::info('USB Payment - Using all pages', [
+            'pdf_total_pages' => $pdfTotalPages,
+            'page_count' => $pageCount
+        ]);
     } else {
         // User specified specific pages
         $pageCount = $this->countPagesFromRanges($pagesInput);
+
+        Log::info('USB Payment - Using specific pages', [
+            'pages_input' => $pagesInput,
+            'page_count' => $pageCount
+        ]);
     }
 
     $copies = (int) $request->input('copies', 1);
     $calculatedTotal = $rate * $pageCount * $copies;
 
+    Log::info('USB Payment Calculation', [
+        'rate' => $rate,
+        'page_count' => $pageCount,
+        'copies' => $copies,
+        'total' => $calculatedTotal
+    ]);
+
     // Create order in session
     $order = [
-        'file_name'  => $request->input('file'),
-        'file_path'  => $filePath,
-        'copies'     => $copies,
-        'pages'      => $pagesInput,
-        'page_count' => $pageCount,
-        'color'      => $color,
-        'paper_size' => $paperSize,
-        'duplex'     => $request->input('duplex', 'one-sided'),
-        'fit'        => $request->input('fit', 'none'),
-        'rate'       => $rate,
-        'subtotal'   => $calculatedTotal,
-        'total'      => $calculatedTotal,
-        'paid'       => false,
+        'file_name'        => $request->input('file'),
+        'file_path'        => $filePath,
+        'copies'           => $copies,
+        'pages'            => $pagesInput,
+        'page_count'       => $pageCount,
+        'color'            => $color,
+        'paper_size'       => $paperSize,
+        'duplex'           => $request->input('duplex', 'one-sided'),
+        'fit'              => $request->input('fit', 'none'),
+        'rate'             => $rate,
+        'subtotal'         => $calculatedTotal,
+        'total'            => $calculatedTotal,
+        'calculated_total' => $calculatedTotal,
+        'paid'             => false,
     ];
 
     Session::put('usb.order', $order);
@@ -199,9 +215,14 @@ public function processPayment(Request $request)
 public function paymentPage()
 {
     $order = Session::get('usb.order');
-    
+
     if (!$order) {
         return redirect()->route('usbfd.index')->with('error', 'No order found. Please select a file first.');
+    }
+
+    // Ensure calculated_total is set (for consistency across all payment pages)
+    if (!isset($order['calculated_total'])) {
+        $order['calculated_total'] = $order['total'] ?? 0;
     }
 
     // Get coin total from Flask server
@@ -338,6 +359,135 @@ public function handlePayment()
         'redirect' => route('usbfd.instruction')
     ]);
 }
+
+public function applyVoucher(Request $request)
+{
+    Log::info('=== USB VOUCHER APPLICATION STARTED ===');
+    Log::info('Request data:', $request->all());
+
+    try {
+        $request->validate([
+            'code' => 'required|string',
+            'source' => 'required|string'
+        ]);
+
+        $code = strtoupper(trim($request->code));
+        Log::info("Validating voucher code: {$code}");
+
+        $order = Session::get('usb.order');
+
+        if (!$order) {
+            Log::error('No active order found in session');
+            return response()->json([
+                'success' => false,
+                'message' => 'No active order found'
+            ], 404);
+        }
+
+        Log::info('Order found:', $order);
+
+        // Check if voucher already applied
+        if (!empty($order['voucher_applied'])) {
+            Log::warning('Voucher already applied to this order');
+            return response()->json([
+                'success' => false,
+                'message' => 'A voucher has already been applied to this order'
+            ], 400);
+        }
+
+        // Find voucher
+        Log::info('Searching for voucher in database...');
+
+        $voucher = Voucher::where('code', $code)->first();
+
+        if (!$voucher) {
+            Log::warning('Voucher not found in database');
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid voucher code. Please check and try again.'
+            ], 400);
+        }
+
+        Log::info('Voucher found:', [
+            'id' => $voucher->id,
+            'code' => $voucher->code,
+            'amount' => $voucher->amount,
+            'expires_at' => $voucher->expires_at
+        ]);
+
+        // Validate voucher
+        if (!$voucher->isValid()) {
+            if ($voucher->is_used || $voucher->is_redeemed) {
+                Log::warning('Voucher already used');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This voucher has already been used'
+                ], 400);
+            }
+
+            if ($voucher->isExpired()) {
+                Log::warning('Voucher has expired');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This voucher expired on ' . $voucher->expires_at->format('M d, Y')
+                ], 400);
+            }
+        }
+
+        Log::info('✅ Voucher is valid');
+
+        // Apply voucher discount
+        $originalTotal = $order['total'];
+        $discount = min($voucher->amount, $originalTotal);
+        $newTotal = max(0, $originalTotal - $discount);
+
+        Log::info('Calculating discount:', [
+            'original_total' => $originalTotal,
+            'voucher_amount' => $voucher->amount,
+            'discount_applied' => $discount,
+            'new_total' => $newTotal
+        ]);
+
+        // Update order with voucher info
+        $order['voucher_applied'] = true;
+        $order['voucher_code'] = $voucher->code;
+        $order['voucher_id'] = $voucher->id;
+        $order['voucher_discount'] = $discount;
+        $order['original_total'] = $originalTotal;
+        $order['total'] = $newTotal;
+        $order['calculated_total'] = $newTotal;
+
+        Session::put('usb.order', $order);
+        Session::save();
+
+        Log::info('Voucher applied successfully, session updated');
+
+        return response()->json([
+            'success' => true,
+            'message' => "₱{$discount} discount applied!",
+            'discount' => $discount,
+            'new_total' => $newTotal,
+            'voucher_code' => $voucher->code
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Validation failed:', $e->errors());
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid request data'
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Voucher application error:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to apply voucher. Please try again.'
+        ], 500);
+    }
+}
+
 // 🖨️ Execute the actual print job
 public function printNow(Request $request)
 {
@@ -414,6 +564,13 @@ public function printNow(Request $request)
         'order' => $order
     ]);
 
+    // Extract job ID from lp output (format: "request id is PRINTER-JOBID")
+    $jobId = null;
+    if ($output && preg_match('/request id is .+-(\d+)/i', $output, $matches)) {
+        $jobId = $matches[1];
+        Log::info('Extracted job ID: ' . $jobId);
+    }
+
     // Log the print job
     PrintLog::create([
         'source' => 'USB',
@@ -426,7 +583,7 @@ public function printNow(Request $request)
         'total_amount' => $order['total'] ?? 0,
     ]);
 
-    // Keep order in session for success page, mark as completed
+    // Mark as completed for session (monitoring will determine when to redirect)
     $order['print_completed'] = true;
     Session::put('usb.order', $order);
     Session::save();
@@ -435,7 +592,8 @@ public function printNow(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Print job sent successfully',
-        'output' => $output
+        'output' => $output,
+        'job_id' => $jobId
     ]);
 }
     // 📄 Instruction page
@@ -447,6 +605,25 @@ public function printNow(Request $request)
         }
 
         return view('USBFD.instructions', compact('order'));
+    }
+
+    // Mark print as completed
+    public function markCompleted(Request $request)
+    {
+        $order = Session::get('usb.order');
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'No order found'], 404);
+        }
+
+        // Mark as completed
+        $order['print_completed'] = true;
+        Session::put('usb.order', $order);
+        Session::save();
+
+        Log::info('USB print marked as completed');
+
+        return response()->json(['success' => true]);
     }
 
     // ✅ Success page

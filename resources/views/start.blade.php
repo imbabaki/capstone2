@@ -121,5 +121,7 @@
       <p class="subtitle">PRINTING VENDO MACHINE</p>
     </div>
   </div>
+
+  @include('partials.emergency-check')
 </body>
 </html>

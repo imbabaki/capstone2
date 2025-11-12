@@ -173,9 +173,16 @@ class FileUploadController extends Controller
             ], 500);
         }
 
+        // Extract job ID from lp output (format: "request id is PRINTER-JOBID")
+        $jobId = null;
+        if ($output && preg_match('/request id is .+-(\d+)/i', $output, $matches)) {
+            $jobId = $matches[1];
+            Log::info('Extracted job ID: ' . $jobId);
+        }
+
         // Log the print job
         PrintLog::create([
-            'source' => 'Upload',
+            'source' => 'QR',
             'file_name' => $order['file_name'],
             'copies' => $order['copies'],
             'page_count' => $order['page_count'] ?? 1,
@@ -185,7 +192,7 @@ class FileUploadController extends Controller
             'total_amount' => $order['calculated_total'],
         ]);
 
-        // Keep order in session for success page, then mark as completed
+        // Mark as completed for session (monitoring will determine when to redirect)
         $order['print_completed'] = true;
         Session::put('upload.order', $order);
         Session::save();
@@ -194,7 +201,7 @@ class FileUploadController extends Controller
             'success' => true,
             'message' => 'Print job sent successfully',
             'output' => $output,
-            'redirect' => route('upload.success')
+            'job_id' => $jobId
         ]);
     }
 
@@ -629,6 +636,24 @@ class FileUploadController extends Controller
         }
     }
     
+    public function markCompleted(Request $request)
+    {
+        $order = Session::get('upload.order');
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'No order found'], 404);
+        }
+
+        // Mark as completed
+        $order['print_completed'] = true;
+        Session::put('upload.order', $order);
+        Session::save();
+
+        Log::info('QR Upload print marked as completed');
+
+        return response()->json(['success' => true]);
+    }
+
     public function success()
     {
         $order = Session::get('upload.order');
@@ -650,6 +675,6 @@ class FileUploadController extends Controller
 
         return view('upload.success', ['order' => $order]);
     }
-    
-   
+
+
 }

@@ -148,7 +148,7 @@ use Illuminate\Support\Str;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      padding: 2vh 3vw;
+      padding: 2vh 3vw 3vh 3vw;
       box-sizing: border-box;
       border-left: 2px solid #334155;
     }
@@ -170,25 +170,25 @@ use Illuminate\Support\Str;
     }
 
     label {
-      font-size: 1.4vh;
+      font-size: 1.8vh;
       font-weight: 600;
       color: #94a3b8;
-      margin-bottom: 0.1vh;
-      margin-top: 0.1vh;
+      margin-bottom: 0.3vh;
+      margin-top: 0.3vh;
     }
 
     select, input[type="text"], input[type="number"] {
       width: 100%;
-      border-radius: 0.8vh;
+      border-radius: 1vh;
       border: 2px solid #334155;
-      padding: 1vh 2vw;
-      font-size: 2vh;
+      padding: 1.5vh 2vw;
+      font-size: 2.5vh;
       font-weight: 700;
       background: #1e293b;
       color: #e2e8f0;
       transition: 0.3s ease;
       cursor: pointer;
-      min-height: 4.5vh;
+      min-height: 6vh;
       box-sizing: border-box;
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -199,13 +199,13 @@ use Illuminate\Support\Str;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 2vw center;
-      background-size: 2.5vh;
+      background-size: 3vh;
       padding-right: 6vw;
     }
 
     /* Make pages input match select width exactly */
     input[type="text"]#pages {
-      padding: 1vh 6vw 1vh 2vw;
+      padding: 1.5vh 6vw 1.5vh 2vw;
       width: 100%;
     }
 
@@ -228,14 +228,14 @@ use Illuminate\Support\Str;
     }
 
     .number-btn {
-      width: 9vw;
-      height: 4.5vh;
-      min-width: 45px;
+      width: 10vw;
+      height: 6vh;
+      min-width: 50px;
       background: linear-gradient(145deg,#334155,#1e293b);
       border: 2px solid #475569;
-      border-radius: 0.8vh;
+      border-radius: 1vh;
       color: #e2e8f0;
-      font-size: 2.5vh;
+      font-size: 3vh;
       cursor: pointer;
       font-weight: 900;
       transition: all 0.2s;
@@ -248,8 +248,8 @@ use Illuminate\Support\Str;
     }
 
     select option {
-      font-size: 2vh;
-      padding: 1vh;
+      font-size: 2.5vh;
+      padding: 1.5vh;
       background: #1e293b;
       color: #e2e8f0;
     }
@@ -258,12 +258,12 @@ use Illuminate\Support\Str;
       background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
       font-weight: 900;
       color: white;
-      font-size: 2.2vh;
-      padding: 1.2vh;
+      font-size: 2.8vh;
+      padding: 1.5vh;
       text-align: center;
       border: 2px solid #38bdf8;
-      border-radius: 0.8vh;
-      min-height: 5.5vh;
+      border-radius: 1vh;
+      min-height: 6vh;
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), 0 0 25px rgba(56, 189, 248, 0.4);
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
@@ -271,16 +271,17 @@ use Illuminate\Support\Str;
     .proceed-button {
       background: linear-gradient(145deg,#22c55e,#16a34a);
       border: none;
-      border-radius: 0.8vh;
+      border-radius: 1vh;
       color: white;
-      font-size: 2.5vh;
+      font-size: 3vh;
       font-weight: 900;
-      padding: 1.2vh;
-      margin-top: 0.3vh;
+      padding: 1.5vh;
+      margin-top: 0.5vh;
+      margin-bottom: 2vh;
       cursor: pointer;
       transition: 0.3s ease;
       box-shadow: 0 4px 12px rgba(34,197,94,0.4);
-      min-height: 5.5vh;
+      min-height: 6vh;
     }
 
     .proceed-button:hover {

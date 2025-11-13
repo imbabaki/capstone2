@@ -46,9 +46,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     width: 100%;
-    height: calc(100vh - 9vh);
+    height: calc(100vh - 7vh);
     text-align: center;
   }
 
@@ -57,8 +57,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    gap: 2vh;
+    width: 100%;
+    gap: 5vh;
+    text-align: center;
   }
 
   h1 {
@@ -68,6 +69,7 @@
     text-shadow: 0 0 2vw rgba(56,189,248,0.6);
     animation: fadeIn 1.2s ease forwards;
     margin: 0;
+    text-align: center;
   }
 
   @keyframes fadeIn {
@@ -79,7 +81,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0;
+    width: 100%;
+    margin: 3vh 0;
     animation: float 3s ease-in-out infinite;
   }
 
@@ -93,6 +96,11 @@
     user-select: none;
     -webkit-user-drag: none;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+    border: 3px solid #0ea5e9;
+    border-radius: 2vh;
+    padding: 2vh;
+    background: rgba(14, 165, 233, 0.1);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.6), 0 0 40px rgba(14, 165, 233, 0.4), inset 0 0 10px rgba(14, 165, 233, 0.2);
   }
 
   .insert-text {
@@ -100,10 +108,12 @@
     font-weight: bold;
     color: #e2e8f0;
     margin: 0;
+    text-align: center;
+    width: 100%;
   }
 
   .back-button {
-    margin-top: 0;
+    margin: 0 auto;
     padding: 1.5vh 6vw;
     font-size: 2.5vh;
     font-weight: 900;
@@ -114,6 +124,7 @@
     box-shadow: 0 4px 12px rgba(14,165,233,0.4);
     transition: all 0.3s ease;
     display: inline-block;
+    text-align: center;
   }
 
   .back-button:hover {
@@ -159,10 +170,10 @@
   }
 
   .pdf-icon {
-    width: 70px;
-    height: 90px;
+    width: 100px;
+    height: 130px;
     background: linear-gradient(145deg,#dc2626,#991b1b);
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -173,27 +184,27 @@
     content: 'PDF';
     color: white;
     font-weight: 900;
-    font-size: 18px;
+    font-size: 28px;
   }
 
   .pdf-icon::after {
     content: '';
     position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 18px;
-    height: 18px;
+    top: -3px;
+    right: -3px;
+    width: 26px;
+    height: 26px;
     background: white;
     clip-path: polygon(100% 0, 0 0, 100% 100%);
   }
 
   .pdf-name {
-    max-width: 90px;
+    max-width: 120px;
     text-align: center;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
     color: #e2e8f0;
-    margin-top: 0.6vh;
+    margin-top: 1vh;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -210,7 +221,7 @@
   }
 
   .preview {
-    flex: 1.2;
+    flex: 1.5;
     padding: 2vh 2vw;
     height: 100%;
     box-sizing: border-box;
@@ -274,22 +285,23 @@
   }
 
   .options {
-    flex: 1.1;
+    flex: 1;
     background: #0f172a;
     color: #e2e8f0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 2vh 3vw;
+    padding: 2vh 3vw 3vh 3vw;
     box-sizing: border-box;
     border-left: 2px solid #334155;
   }
 
   .options h3 {
-    font-size: 2.8vh;
+    font-size: 2.5vh;
     font-weight: 700;
     color: #38bdf8;
-    margin-bottom: 1vh;
+    margin-bottom: 0.5vh;
+    margin-top: 0;
   }
 
   .options form {
@@ -301,25 +313,25 @@
   }
 
   label {
-    font-size: 1.4vh;
+    font-size: 1.8vh;
     font-weight: 600;
     color: #94a3b8;
-    margin-bottom: 0.1vh;
-    margin-top: 0.1vh;
+    margin-bottom: 0.3vh;
+    margin-top: 0.3vh;
   }
 
   select, input[type="text"], input[type="number"] {
     width: 100%;
-    border-radius: 0.8vh;
+    border-radius: 1vh;
     border: 2px solid #334155;
-    padding: 1vh 2vw;
-    font-size: 2vh;
+    padding: 1.5vh 2vw;
+    font-size: 2.5vh;
     font-weight: 700;
     background: #1e293b;
     color: #e2e8f0;
     transition: 0.3s ease;
     cursor: pointer;
-    min-height: 4.5vh;
+    min-height: 6vh;
     box-sizing: border-box;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -330,13 +342,13 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 2vw center;
-    background-size: 2.5vh;
+    background-size: 3vh;
     padding-right: 6vw;
   }
 
   /* Make pages input match select width exactly */
   input[type="text"]#pages {
-    padding: 1vh 6vw 1vh 2vw;
+    padding: 1.5vh 6vw 1.5vh 2vw;
     width: 100%;
   }
 
@@ -359,14 +371,14 @@
   }
 
   .number-btn {
-    width: 9vw;
-    height: 4.5vh;
-    min-width: 45px;
+    width: 10vw;
+    height: 6vh;
+    min-width: 50px;
     background: linear-gradient(145deg,#334155,#1e293b);
     border: 2px solid #475569;
-    border-radius: 0.8vh;
+    border-radius: 1vh;
     color: #e2e8f0;
-    font-size: 2.5vh;
+    font-size: 3vh;
     cursor: pointer;
     font-weight: 900;
     transition: all 0.2s;
@@ -380,8 +392,8 @@
 
   /* Make select option text bigger */
   select option {
-    font-size: 2vh;
-    padding: 1vh;
+    font-size: 2.5vh;
+    padding: 1.5vh;
     background: #1e293b;
     color: #e2e8f0;
   }
@@ -390,12 +402,12 @@
     background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     font-weight: 900;
     color: white;
-    font-size: 2.2vh;
-    padding: 1.2vh;
+    font-size: 2.8vh;
+    padding: 1.5vh;
     text-align: center;
     border: 2px solid #38bdf8;
-    border-radius: 0.8vh;
-    min-height: 5.5vh;
+    border-radius: 1vh;
+    min-height: 6vh;
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), 0 0 25px rgba(56, 189, 248, 0.4);
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
@@ -403,16 +415,17 @@
   .proceed-button {
     background: linear-gradient(145deg,#22c55e,#16a34a);
     border: none;
-    border-radius: 0.8vh;
+    border-radius: 1vh;
     color: white;
-    font-size: 2.5vh;
+    font-size: 3vh;
     font-weight: 900;
-    padding: 1.2vh;
-    margin-top: 0.3vh;
+    padding: 1.5vh;
+    margin-top: 0.5vh;
+    margin-bottom: 2vh;
     cursor: pointer;
     transition: 0.3s ease;
     box-shadow: 0 4px 12px rgba(34,197,94,0.4);
-    min-height: 5.5vh;
+    min-height: 6vh;
   }
 
   .proceed-button:hover {
@@ -631,7 +644,7 @@
           @endforeach
         @endif
       </ul>
-      <div id="fileListBackButton" style="position: absolute; bottom: 2vh; left: 0; right: 0; text-align: center;">
+      <div id="fileListBackButton" style="position: absolute; bottom: 3vh; left: 0; right: 0; text-align: center;">
         <a href="{{ route('options') }}" class="back-button">← BACK</a>
       </div>
 
@@ -644,9 +657,9 @@
         </div>
 
         <div class="options">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2vh;">
-            <h3 style="margin: 0;">Print Settings</h3>
-            <a href="{{ route('options') }}" class="back-button" style="padding: 1.2vh 4vw; font-size: 2.2vh; margin: 0;">← BACK</a>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1vh; gap: 2vw;">
+            <h3 style="margin: 0; flex-shrink: 0;">Print Settings</h3>
+            <a href="{{ route('options') }}" class="back-button" id="backButton" style="padding: 1vh 3vw; font-size: 1.8vh; margin: 0; flex-shrink: 0;">← BACK</a>
           </div>
           <form action="{{ route('usbfd.process-payment') }}" method="POST" id="printForm">
             @csrf

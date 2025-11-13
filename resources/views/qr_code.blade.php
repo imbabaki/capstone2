@@ -57,7 +57,17 @@
       font-weight: 900;
       color: #38bdf8;
       text-shadow: 0 0 2vw rgba(56,189,248,0.6);
+      margin-bottom: 1vh;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .wifi-reminder {
+      font-size: 3.5vh;
+      font-weight: 900;
+      color: #fbbf24;
+      text-shadow: 0 0 1.5vh rgba(251, 191, 36, 0.8);
       margin-bottom: 2vh;
+      text-align: center;
       animation: fadeIn 1.2s ease forwards;
     }
 
@@ -73,11 +83,12 @@
       align-items: center;
       justify-content: center;
       background: linear-gradient(145deg, #1e293b, #0f172a);
-      padding: 2.5vh 6vw;
+      padding: 3vh;
       border-radius: 1.5vh;
       border: 3px solid #0ea5e9;
       box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
-      width: clamp(55vw, 70vw, 80vw);
+      width: auto;
+      max-width: 50vh;
       margin-bottom: 2vh;
       animation: fadeIn 1.2s ease forwards;
     }
@@ -105,7 +116,7 @@
     .qr-code-wrapper svg,
     .qr-code-wrapper img {
       width: clamp(22vh, 28vh, 32vh);
-      height: auto;
+      height: clamp(22vh, 28vh, 32vh);
     }
 
     .qr-container p {
@@ -155,6 +166,8 @@
   <div class="main-container">
     <h1>QR UPLOAD</h1>
 
+    <p class="wifi-reminder">Make sure you are connected to "instaprinthotspot" WiFi</p>
+
     <div class="qr-container">
       <h2>Scan to Upload Your File</h2>
 
@@ -163,7 +176,7 @@
         {!! $qr !!}
       </div>
 
-      <p>Or visit: <a href="{{ $uploadUrl }}" target="_blank">{{ $uploadUrl }}</a></p>
+
     </div>
 
     <a href="{{ route('options') }}" class="back-button">← BACK</a>

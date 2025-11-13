@@ -380,6 +380,17 @@ class FileUploadController extends Controller
             Session::put('upload.order', $order);
             Session::save();
 
+            // Mark voucher as redeemed immediately when applied
+            if ($voucher->redeem()) {
+                Log::info('Voucher marked as redeemed upon application', [
+                    'code' => $voucher->code,
+                    'order' => 'QR Upload',
+                    'used_at' => $voucher->used_at
+                ]);
+            } else {
+                Log::warning('Failed to mark voucher as redeemed', ['code' => $voucher->code]);
+            }
+
             Log::info('Voucher applied successfully, session updated');
             Log::info('=== UPLOAD VOUCHER APPLICATION COMPLETED ===');
 
@@ -504,24 +515,13 @@ class FileUploadController extends Controller
                 ], 400);
             }
 
-            // Redeem applied voucher if exists
-            if (!empty($order['voucher_applied']) && !empty($order['voucher_id'])) {
-                Log::info('Attempting to redeem voucher:', ['voucher_id' => $order['voucher_id']]);
-
-                $voucher = Voucher::find($order['voucher_id']);
-                if ($voucher && $voucher->isValid()) {
-                    if ($voucher->redeem()) {
-                        Log::info('Voucher redeemed successfully', [
-                            'code' => $voucher->code,
-                            'order' => 'Upload',
-                            'used_at' => $voucher->used_at
-                        ]);
-                    } else {
-                        Log::warning('Failed to redeem voucher', ['code' => $voucher->code]);
-                    }
-                } else {
-                    Log::warning('Voucher not found or invalid', ['voucher_id' => $order['voucher_id']]);
-                }
+            // Voucher already redeemed during application (applyVoucher method)
+            // Just log that a voucher was used for this order
+            if (!empty($order['voucher_applied']) && !empty($order['voucher_code'])) {
+                Log::info('Order used voucher:', [
+                    'voucher_code' => $order['voucher_code'],
+                    'discount' => $order['voucher_discount'] ?? 0
+                ]);
             }
 
             // Calculate change from coins inserted

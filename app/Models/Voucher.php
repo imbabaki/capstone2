@@ -98,6 +98,24 @@ class Voucher extends Model
     }
 
     /**
+     * Accessor for is_used - checks both is_used and is_redeemed columns
+     */
+    public function getIsUsedAttribute($value)
+    {
+        // If the actual is_used column exists and has a value, use it
+        if (array_key_exists('is_used', $this->attributes)) {
+            return (bool) $this->attributes['is_used'];
+        }
+
+        // Otherwise, fall back to is_redeemed
+        if (array_key_exists('is_redeemed', $this->attributes)) {
+            return (bool) $this->attributes['is_redeemed'];
+        }
+
+        return false;
+    }
+
+    /**
      * Scope for valid vouchers only
      */
     public function scopeValid($query)

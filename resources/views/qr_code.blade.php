@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <title>Instaprint - QR Upload</title>
   <meta name="viewport" content="width=1024, height=600, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
+  <script src="/vendor/pusher/pusher.min.js"></script>
 
   <style>
     html, body {
@@ -54,11 +53,11 @@
     }
 
     h1 {
-      font-size: 6vh;
+      font-size: 5vh;
       font-weight: 900;
       color: #38bdf8;
       text-shadow: 0 0 2vw rgba(56,189,248,0.6);
-      margin-bottom: 4vh;
+      margin-bottom: 2vh;
       animation: fadeIn 1.2s ease forwards;
     }
 
@@ -74,20 +73,20 @@
       align-items: center;
       justify-content: center;
       background: linear-gradient(145deg, #1e293b, #0f172a);
-      padding: 4vh 6vw;
+      padding: 2.5vh 6vw;
       border-radius: 1.5vh;
       border: 3px solid #0ea5e9;
       box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
       width: clamp(55vw, 70vw, 80vw);
-      margin-bottom: 3vh;
+      margin-bottom: 2vh;
       animation: fadeIn 1.2s ease forwards;
     }
 
     .qr-container h2 {
-      font-size: 3.5vh;
+      font-size: 3vh;
       font-weight: 700;
       color: #38bdf8;
-      margin-bottom: 2vh;
+      margin-bottom: 1.5vh;
       text-shadow: 0 0 1.5vh rgba(56, 189, 248, 0.8);
     }
 
@@ -95,22 +94,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 3vh;
+      margin-bottom: 2vh;
       width: 100%;
       background: white;
-      padding: 2vh;
+      padding: 1.5vh;
       border-radius: 1vh;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .qr-code-wrapper svg,
     .qr-code-wrapper img {
-      width: clamp(25vh, 35vh, 40vh);
+      width: clamp(22vh, 28vh, 32vh);
       height: auto;
     }
 
     .qr-container p {
-      font-size: 2.4vh;
+      font-size: 2vh;
       font-weight: 600;
       color: #e2e8f0;
     }
@@ -128,9 +127,9 @@
 
     /* Back Button */
     .back-button {
-      margin-top: 2vh;
-      padding: 1.8vh 6vw;
-      font-size: 2.8vh;
+      margin-top: 1vh;
+      padding: 1.5vh 6vw;
+      font-size: 2.5vh;
       font-weight: 900;
       border-radius: 4vh;
       background: linear-gradient(145deg,#0ea5e9,#0284c7);
@@ -138,6 +137,7 @@
       text-decoration: none;
       box-shadow: 0 4px 12px rgba(14,165,233,0.4);
       transition: all 0.3s ease;
+      display: inline-block;
     }
 
     .back-button:hover {
@@ -219,5 +219,6 @@
     }, 3000);
   </script>
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

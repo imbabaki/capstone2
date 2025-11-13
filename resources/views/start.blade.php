@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Kiosk Instaprint</title>
   <meta name="viewport" content="width=device-width, height=600, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
@@ -123,5 +122,6 @@
   </div>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

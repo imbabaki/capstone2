@@ -55,4 +55,48 @@ class DashboardController extends Controller
             'status' => SystemSetting::isEmergencyShutdown() ? 'disabled' : 'operational'
         ]);
     }
+
+    public function clearDatabase(Request $request)
+    {
+        try {
+            $driver = \DB::getDriverName();
+
+            // Disable foreign key checks based on database driver
+            if ($driver === 'mysql') {
+                \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            } elseif ($driver === 'sqlite') {
+                \DB::statement('PRAGMA foreign_keys = OFF;');
+            }
+
+            // Clear all main tables
+            PrintLog::truncate();
+            Voucher::truncate();
+            Sale::truncate();
+
+            // Reset system settings except admin credentials and emergency shutdown
+            SystemSetting::whereNotIn('key', ['admin_username', 'admin_password', 'emergency_shutdown'])->delete();
+
+            // Re-enable foreign key checks
+            if ($driver === 'mysql') {
+                \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            } elseif ($driver === 'sqlite') {
+                \DB::statement('PRAGMA foreign_keys = ON;');
+            }
+
+            \Log::info('Database cleared by admin', [
+                'admin' => session('admin_username'),
+                'timestamp' => now(),
+                'driver' => $driver
+            ]);
+
+            return redirect()->route('admin.dashboard')->with('success', 'Database cleared successfully! All sales, print logs, and vouchers have been reset to zero.');
+        } catch (\Exception $e) {
+            \Log::error('Database clear failed', [
+                'error' => $e->getMessage(),
+                'admin' => session('admin_username')
+            ]);
+
+            return redirect()->route('admin.dashboard')->with('error', 'Failed to clear database: ' . $e->getMessage());
+        }
+    }
 }

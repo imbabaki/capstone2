@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>@yield('title', 'Admin') - InstaPrint</title>
     <link rel="stylesheet" href="{{ asset('css/admin-mobile.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 </head>
 <body>
     @auth

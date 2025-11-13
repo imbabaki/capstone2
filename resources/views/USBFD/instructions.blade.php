@@ -533,7 +533,7 @@
 
                     {{-- Continue Print Button --}}
                     <button id="continue-print-btn" class="continue-print-btn">
-                        ▶️ CONTINUE PRINT
+                        ▶️ Emergency CONTINUE PRINT
                     </button>
                 </div>
 
@@ -692,5 +692,6 @@
     </script>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

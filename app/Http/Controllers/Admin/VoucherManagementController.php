@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use App\Models\VoucherSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class VoucherManagementController extends Controller
@@ -21,11 +22,27 @@ class VoucherManagementController extends Controller
                 $query->valid();
                 break;
             case 'used':
-                $query->where('is_used', true);
+                // Check both column names for compatibility
+                $query->where(function($q) {
+                    if (Schema::hasColumn('vouchers', 'is_redeemed')) {
+                        $q->where('is_redeemed', true);
+                    }
+                    if (Schema::hasColumn('vouchers', 'is_used')) {
+                        $q->orWhere('is_used', true);
+                    }
+                });
                 break;
             case 'expired':
-                $query->where('is_used', false)
-                      ->where('expires_at', '<', now());
+                // Check for unused/unredeemed vouchers that are expired
+                $query->where(function($q) {
+                    if (Schema::hasColumn('vouchers', 'is_redeemed')) {
+                        $q->where('is_redeemed', false);
+                    }
+                    if (Schema::hasColumn('vouchers', 'is_used')) {
+                        $q->where('is_used', false);
+                    }
+                })
+                ->where('expires_at', '<', now());
                 break;
         }
 

@@ -42,6 +42,9 @@ Route::middleware(['admin'])->group(function () {
     // Emergency Shutdown
     Route::post('/admin/emergency-shutdown/toggle', [DashboardController::class, 'toggleEmergencyShutdown'])->name('admin.emergency.toggle');
 
+    // Database Management
+    Route::post('/admin/database/clear', [DashboardController::class, 'clearDatabase'])->name('admin.database.clear');
+
     // Sales Report
     Route::get('/admin/sales-report', [SalesReportController::class, 'index'])->name('admin.sales.report');
 

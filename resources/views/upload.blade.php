@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {{-- Pusher + Echo --}}
-    <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
-    @vite(['resources/js/echo.js']) {{-- or mix if you’re still on Laravel Mix --}}
+    <script src="/vendor/pusher/pusher.min.js"></script>
+    @vite(['resources/js/echo.js']) {{-- or mix if you're still on Laravel Mix --}}
 
     <style>
         body {

@@ -10,13 +10,6 @@
     </h1>
 </div>
 
-<!-- Success Message -->
-@if(session('success'))
-<div class="alert alert-success mb-2">
-    <i class="fas fa-check-circle"></i> {{ session('success') }}
-</div>
-@endif
-
 <!-- Emergency Shutdown Card -->
 <div class="card mb-2" style="border: 3px solid {{ $emergencyShutdown ? '#ef4444' : '#22c55e' }};">
     <div class="card-header" style="background: {{ $emergencyShutdown ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #22c55e, #16a34a)' }}; color: white;">
@@ -129,6 +122,50 @@
     setInterval(updateDashboardStatus, 2000);
 })();
 </script>
+
+<!-- Clear Database Card -->
+<div class="card mb-2" style="border: 3px solid #f59e0b;">
+    <div class="card-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+        <i class="fas fa-database"></i>
+        Database Management
+    </div>
+    <div style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; color: #f59e0b;">
+                    Clear All Data
+                </h3>
+                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">
+                    <strong style="color: #f59e0b;">⚠️ WARNING</strong><br>
+                    This will permanently delete all sales records, print logs, and vouchers. This action cannot be undone!
+                </p>
+            </div>
+            <div>
+                <form action="{{ route('admin.database.clear') }}" method="POST" onsubmit="return confirm('⚠️ CRITICAL WARNING!\n\nThis will PERMANENTLY DELETE:\n- All sales records\n- All print logs\n- All vouchers\n- All transaction history\n\nThis action CANNOT be undone!\n\nAre you absolutely sure you want to proceed?');">
+                    @csrf
+                    <button type="submit" class="btn" style="
+                        background: linear-gradient(135deg, #ef4444, #dc2626);
+                        color: white;
+                        padding: 1rem 2rem;
+                        font-size: 1.1rem;
+                        font-weight: 900;
+                        border: none;
+                        border-radius: 0.5rem;
+                        cursor: pointer;
+                        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+                        transition: all 0.2s;
+                    ">
+                        <i class="fas fa-trash-alt"></i>
+                        CLEAR DATABASE
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 0.5rem; padding: 1rem; font-size: 0.9rem; color: #475569;">
+            <strong>ℹ️ Note:</strong> This will reset all sales, print logs, and vouchers to zero. Admin credentials and emergency shutdown settings will be preserved. Use this feature when you need to start fresh or for maintenance purposes.
+        </div>
+    </div>
+</div>
 
 <!-- Statistics Cards -->
 <div class="grid grid-2 mb-2">

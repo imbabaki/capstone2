@@ -399,5 +399,6 @@
     </script>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

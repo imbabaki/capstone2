@@ -280,6 +280,15 @@ public function handlePayment()
         ], 400);
     }
 
+    // Voucher already redeemed during application (applyVoucher method)
+    // Just log that a voucher was used for this order
+    if (!empty($order['voucher_applied']) && !empty($order['voucher_code'])) {
+        Log::info('Order used voucher:', [
+            'voucher_code' => $order['voucher_code'],
+            'discount' => $order['voucher_discount'] ?? 0
+        ]);
+    }
+
     // ✅ Calculate change
     $change = $coinTotal - $orderTotal;
     $voucher = null;
@@ -459,6 +468,17 @@ public function applyVoucher(Request $request)
 
         Session::put('usb.order', $order);
         Session::save();
+
+        // Mark voucher as redeemed immediately when applied
+        if ($voucher->redeem()) {
+            Log::info('Voucher marked as redeemed upon application', [
+                'code' => $voucher->code,
+                'order' => 'USB',
+                'used_at' => $voucher->used_at
+            ]);
+        } else {
+            Log::warning('Failed to mark voucher as redeemed', ['code' => $voucher->code]);
+        }
 
         Log::info('Voucher applied successfully, session updated');
 

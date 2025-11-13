@@ -7,7 +7,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=800, height=480, initial-scale=1.0">
   <title>USB Flash Drive Mode</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
   html, body {
@@ -59,14 +58,16 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+    gap: 2vh;
   }
 
   h1 {
-    font-size: 6vh;
+    font-size: 5vh;
     font-weight: 900;
     color: #38bdf8;
     text-shadow: 0 0 2vw rgba(56,189,248,0.6);
     animation: fadeIn 1.2s ease forwards;
+    margin: 0;
   }
 
   @keyframes fadeIn {
@@ -78,7 +79,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 4vh 0;
+    margin: 0;
     animation: float 3s ease-in-out infinite;
   }
 
@@ -88,23 +89,23 @@
   }
 
   .usb-image img {
-    width: clamp(20vh,25vw,35vh);
+    width: clamp(18vh,22vw,28vh);
     user-select: none;
     -webkit-user-drag: none;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
   }
 
   .insert-text {
-    font-size: 5vh;
+    font-size: 4vh;
     font-weight: bold;
     color: #e2e8f0;
-    margin-top: 2vh;
+    margin: 0;
   }
 
   .back-button {
-    margin-top: 3vh;
-    padding: 1.8vh 6vw;
-    font-size: 2.8vh;
+    margin-top: 0;
+    padding: 1.5vh 6vw;
+    font-size: 2.5vh;
     font-weight: 900;
     border-radius: 4vh;
     background: linear-gradient(145deg,#0ea5e9,#0284c7);
@@ -112,6 +113,7 @@
     text-decoration: none;
     box-shadow: 0 4px 12px rgba(14,165,233,0.4);
     transition: all 0.3s ease;
+    display: inline-block;
   }
 
   .back-button:hover {
@@ -127,7 +129,7 @@
   }
 
   #chooseFileHeader {
-    font-size: 4vh;
+    font-size: 3.5vh;
     margin: 1vh 0;
   }
 
@@ -284,10 +286,10 @@
   }
 
   .options h3 {
-    font-size: 3.2vh;
+    font-size: 2.8vh;
     font-weight: 700;
     color: #38bdf8;
-    margin-bottom: 2vh;
+    margin-bottom: 1vh;
   }
 
   .options form {
@@ -295,29 +297,30 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.5vh;
+    gap: 0.3vh;
   }
 
   label {
-    font-size: 1.8vh;
+    font-size: 1.4vh;
     font-weight: 600;
     color: #94a3b8;
-    margin-bottom: 0.2vh;
-    margin-top: 0.2vh;
+    margin-bottom: 0.1vh;
+    margin-top: 0.1vh;
   }
 
   select, input[type="text"], input[type="number"] {
     width: 100%;
-    border-radius: 1vh;
-    border: 3px solid #334155;
-    padding: 2vh 2vw;
-    font-size: 3.5vh;
+    border-radius: 0.8vh;
+    border: 2px solid #334155;
+    padding: 1vh 2vw;
+    font-size: 2vh;
     font-weight: 700;
     background: #1e293b;
     color: #e2e8f0;
     transition: 0.3s ease;
     cursor: pointer;
-    min-height: 7vh;
+    min-height: 4.5vh;
+    box-sizing: border-box;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -327,15 +330,21 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 2vw center;
-    background-size: 3vh;
+    background-size: 2.5vh;
     padding-right: 6vw;
+  }
+
+  /* Make pages input match select width exactly */
+  input[type="text"]#pages {
+    padding: 1vh 6vw 1vh 2vw;
+    width: 100%;
   }
 
   select:focus, input:focus {
     outline: none;
     border-color: #0ea5e9;
-    border-width: 3px;
-    box-shadow: 0 0 0 4px rgba(14,165,233,0.4);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.4);
   }
 
   .number-input-wrapper {
@@ -350,14 +359,14 @@
   }
 
   .number-btn {
-    width: 10vw;
-    height: 7vh;
-    min-width: 55px;
+    width: 9vw;
+    height: 4.5vh;
+    min-width: 45px;
     background: linear-gradient(145deg,#334155,#1e293b);
-    border: 3px solid #475569;
-    border-radius: 1vh;
+    border: 2px solid #475569;
+    border-radius: 0.8vh;
     color: #e2e8f0;
-    font-size: 5vh;
+    font-size: 2.5vh;
     cursor: pointer;
     font-weight: 900;
     transition: all 0.2s;
@@ -371,36 +380,39 @@
 
   /* Make select option text bigger */
   select option {
-    font-size: 3.5vh;
-    padding: 2vh;
+    font-size: 2vh;
+    padding: 1vh;
     background: #1e293b;
     color: #e2e8f0;
   }
 
   #totalAmount {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     font-weight: 900;
     color: white;
-    font-size: 3vh;
-    padding: 1.8vh 2vw;
+    font-size: 2.2vh;
+    padding: 1.2vh;
     text-align: center;
-    border: 3px solid #ea580c;
-    min-height: 7vh;
+    border: 2px solid #38bdf8;
+    border-radius: 0.8vh;
+    min-height: 5.5vh;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), 0 0 25px rgba(56, 189, 248, 0.4);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
 
   .proceed-button {
     background: linear-gradient(145deg,#22c55e,#16a34a);
     border: none;
-    border-radius: 1vh;
+    border-radius: 0.8vh;
     color: white;
-    font-size: 3.8vh;
+    font-size: 2.5vh;
     font-weight: 900;
-    padding: 1.8vh;
-    margin-top: 0.5vh;
+    padding: 1.2vh;
+    margin-top: 0.3vh;
     cursor: pointer;
     transition: 0.3s ease;
     box-shadow: 0 4px 12px rgba(34,197,94,0.4);
-    min-height: 7.5vh;
+    min-height: 5.5vh;
   }
 
   .proceed-button:hover {
@@ -606,7 +618,7 @@
       <a href="{{ route('options') }}" class="back-button">← BACK</a>
     </div>
 
-    <div id="usbUI" style="display:none;">
+    <div id="usbUI" style="display:none; position: relative;">
       <h1 id="chooseFileHeader">CHOOSE YOUR FILE</h1>
       <ul id="pdfList" class="pdf-grid">
         @if(!empty($pdfFiles))
@@ -619,6 +631,9 @@
           @endforeach
         @endif
       </ul>
+      <div id="fileListBackButton" style="position: absolute; bottom: 2vh; left: 0; right: 0; text-align: center;">
+        <a href="{{ route('options') }}" class="back-button">← BACK</a>
+      </div>
 
       <div id="pdfPreview" style="display:none;" class="container">
         <div class="preview">
@@ -629,7 +644,10 @@
         </div>
 
         <div class="options">
-          <h3>Print Settings</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2vh;">
+            <h3 style="margin: 0;">Print Settings</h3>
+            <a href="{{ route('options') }}" class="back-button" style="padding: 1.2vh 4vw; font-size: 2.2vh; margin: 0;">← BACK</a>
+          </div>
           <form action="{{ route('usbfd.process-payment') }}" method="POST" id="printForm">
             @csrf
             <input type="hidden" name="file" id="selectedFileName">
@@ -754,6 +772,7 @@
     currentPdfTotalPages = pdfPages;
     chooseFileHeader.style.display = 'none';
     pdfListEl.style.display = 'none';
+    document.getElementById('fileListBackButton').style.display = 'none';
     usbUI.style.display = 'block';
     pdfPreview.style.display = 'flex';
 
@@ -960,6 +979,12 @@
         chooseFileHeader.style.display = 'block';
       }
 
+      // Show the back button when file list is displayed
+      const backBtn = document.getElementById('fileListBackButton');
+      if (backBtn) {
+        backBtn.style.display = 'block';
+      }
+
       pdfListEl.innerHTML = '';
       if (files.length === 0) {
         console.log('⚠️ No PDF files found');
@@ -1009,5 +1034,6 @@
     connectStream();
     window.addEventListener('beforeunload', () => { try { evtSource.close(); } catch(_) {} });
   </script>
+  @include('partials.hide-url')
 </body>
 </html>

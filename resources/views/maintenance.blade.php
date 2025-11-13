@@ -110,7 +110,7 @@
 <body>
     <div class="maintenance-container">
         <div class="icon-container">
-            <div class="icon">⛔</div>
+            <img src="/icons/warninglogo.png" alt="Warning" style="width: 15vh; height: auto; filter: drop-shadow(0 0 3vh rgba(239, 68, 68, 0.5));">
         </div>
 
         <h1 class="pulse">Machine Temporarily Disabled</h1>

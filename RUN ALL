@@ -4,16 +4,11 @@ soketi start
 ./start_usb_server.sh
 
 source .venv/bin/activate
-python3 Coin_server.py &
-python3 Dispenser_Server.py &
-python3 emergency_jam_server.py &
-python3 cups_monitor_server.py &
+python3 Coin_server.py 
+python3 Dispenser_Server.py 
+python3 emergency_jam_server.py 
+python3 cups_monitor_server.py 
 
-
-
-#bluetooth
-source ~/venv_bluetooth/bin/activate
-python3 bluetooth_flask_instaprint.py
 
 
 

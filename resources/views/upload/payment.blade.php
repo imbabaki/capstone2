@@ -749,7 +749,7 @@
       }
     });
 
-    const required = {{ $order['calculated_total'] }};
+    let required = {{ $order['calculated_total'] }};
     const evtSource = new EventSource("http://127.0.0.1:5003/coin/stream");
 
     // --- Update Function ---
@@ -949,7 +949,30 @@
 
         if (data.success) {
           msgEl.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-          setTimeout(() => window.location.href = "{{ route('upload.payment.view') }}", 1500);
+
+          // Update the total amount display without reloading
+          if (data.new_total !== undefined) {
+            const totalElements = document.querySelectorAll('.amount-value.total');
+            totalElements.forEach(el => {
+              el.textContent = '₱' + parseFloat(data.new_total).toFixed(2);
+            });
+
+            // Update the required amount variable
+            required = parseFloat(data.new_total);
+            console.log('✅ Updated required amount to:', required);
+
+            // Trigger updatePayment to check if confirm button should appear
+            const currentCoinTotal = parseFloat(document.getElementById('coinTotal').textContent.replace('₱', '')) || 0;
+            updatePayment(currentCoinTotal);
+          }
+
+          // Hide voucher input section after successful application
+          setTimeout(() => {
+            const voucherBox = document.getElementById('voucherBox');
+            if (voucherBox) {
+              voucherBox.style.display = 'none';
+            }
+          }, 2000);
         } else {
           msgEl.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
           applyBtn.disabled = false;
@@ -1019,5 +1042,6 @@
   </script>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

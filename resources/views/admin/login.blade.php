@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Admin Login - InstaPrint</title>
     <link rel="stylesheet" href="{{ asset('css/admin-mobile.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/all.min.css') }}">
 </head>
 <body class="login-page">
     <div class="login-container">

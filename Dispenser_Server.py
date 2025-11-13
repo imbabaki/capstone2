@@ -80,7 +80,7 @@ def dispense_papers(paper_size, count):
             print(f"Sensor: {state}, paper_detected={paper_detected}, count={paper_count}/{target_count}")
 
             # ✅ Check if no activity for 2.5 seconds (paper is blocking)
-            if current_time - last_activity_time > 2.5 and not motor_paused_due_to_blocking:
+            if current_time - last_activity_time > 3.5 and not motor_paused_due_to_blocking:
                 motor_paused_due_to_blocking = True
                 block_start_time = current_time  # Mark when blocking started
                 GPIO.output(relay_pin, GPIO.HIGH)  # Stop motor
@@ -89,7 +89,7 @@ def dispense_papers(paper_size, count):
             # ✅ Check if blocked for 20 seconds total - trigger temporary disable
             if motor_paused_due_to_blocking and block_start_time:
                 blocked_duration = current_time - block_start_time
-                total_blocked_time += 0.02  # Add polling interval
+                total_blocked_time += 3.00  # Add polling interval
 
                 if blocked_duration > 20:
                     print("🚨 CRITICAL: Blocked for 20 seconds! Triggering temporary disable mechanism...")

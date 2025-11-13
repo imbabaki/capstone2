@@ -289,7 +289,9 @@
     <div class="main-container">
         <h1>BLUETOOTH PRINT</h1>
 
-        <div class="bluetooth-icon">📶</div>
+        <div class="bluetooth-icon" id="main-icon">
+            <img src="/icons/bluetooth.gif" alt="Bluetooth" style="width: 15vh; height: auto; filter: drop-shadow(0 8px 16px rgba(56,189,248,0.5));">
+        </div>
 
         <div class="main-card">
             <!-- Status Messages -->
@@ -322,7 +324,9 @@
         <!-- Accept/Reject File Dialog -->
         <div id="file-dialog" class="file-dialog">
             <div style="text-align: center;">
-                <div class="file-icon">📄</div>
+                <div class="file-icon">
+                    <img src="/icons/bluetooth1.png" alt="Bluetooth Incoming" style="width: 10vh; height: auto;">
+                </div>
                 <div class="section-title">Incoming File</div>
                 <div id="dialog-filename" class="file-name"></div>
                 <div class="dialog-buttons">
@@ -339,7 +343,7 @@
         <a href="{{ route('start') }}" class="back-button">← BACK</a>
     </div>
 
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="/vendor/socketio/socket.io.min.js"></script>
     <script>
         console.log("📡 Bluetooth print service initialized");
 
@@ -350,6 +354,7 @@
         const progressContainer = document.getElementById('progress-container');
         const progressArea = document.getElementById('progress-area');
         const enableBtn = document.getElementById('enable-btn');
+        const mainIcon = document.getElementById('main-icon');
 
         function setStatus(status) {
             // Hide all status messages
@@ -363,15 +368,21 @@
                 progressContainer.style.display = 'none';
                 enableBtn.disabled = false;
                 enableBtn.innerHTML = '🔊 MAKE DISCOVERABLE';
+                // Change icon back to bluetooth
+                mainIcon.innerHTML = '<img src="/icons/bluetooth.gif" alt="Bluetooth" style="width: 15vh; height: auto; filter: drop-shadow(0 8px 16px rgba(56,189,248,0.5));">';
             } else if (status === 'discoverable') {
                 statusDiscoverable.classList.add('active');
                 progressContainer.style.display = 'none';
                 enableBtn.disabled = true;
                 enableBtn.innerHTML = '✓ DISCOVERABLE';
+                // Keep bluetooth icon
+                mainIcon.innerHTML = '<img src="/icons/bluetooth.gif" alt="Bluetooth" style="width: 15vh; height: auto; filter: drop-shadow(0 8px 16px rgba(56,189,248,0.5));">';
             } else if (status === 'receiving') {
                 statusReceiving.classList.add('active');
                 progressContainer.style.display = 'block';
                 enableBtn.disabled = true;
+                // Change icon to files sent
+                mainIcon.innerHTML = '<img src="/icons/files sent.gif" alt="Receiving File" style="width: 15vh; height: auto; filter: drop-shadow(0 8px 16px rgba(56,189,248,0.5));">';
             }
         }
 
@@ -533,5 +544,6 @@
     </script>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

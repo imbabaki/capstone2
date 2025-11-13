@@ -18,7 +18,7 @@
     </ul>
 </div>
 
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="/vendor/socketio/socket.io.min.js"></script>
 <script>
     console.log("Connecting to Socket.IO...");
 

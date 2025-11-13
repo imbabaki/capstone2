@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1024, height=600, initial-scale=1.0">
   <title>Choose Input Method</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body {
       width: 100%;
@@ -77,7 +76,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
+      overflow: visible;
       padding: 2vh 4vw;
     }
 
@@ -110,6 +109,7 @@
       animation: slideIn 1s ease forwards;
       transition: all 0.3s ease-in-out;
       cursor: pointer;
+      overflow: visible;
     }
 
     .option-btn:nth-child(1) { animation-delay: 0.3s; }
@@ -181,5 +181,6 @@
     </div>
   </div>
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>

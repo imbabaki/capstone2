@@ -512,7 +512,7 @@
 
                     {{-- Continue Print Button --}}
                     <button id="continue-print-btn" class="continue-print-btn">
-                        ▶️ CONTINUE PRINT
+                        ▶️ Emergency CONTINUE PRINT
                     </button>
                 </div>
 
@@ -668,37 +668,9 @@
                 this.textContent = '▶️ CONTINUE PRINT';
             });
         });
-
-        // 3-minute inactivity timeout - redirect to start
-        let inactivityTimer;
-        const TIMEOUT_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                console.log('3-minute inactivity timeout reached, redirecting to start...');
-                window.location.href = "{{ route('start') }}";
-            }, TIMEOUT_DURATION);
-            console.log('Inactivity timer reset - will redirect in 3 minutes');
-        }
-
-        // Reset timer ONLY on meaningful user interactions
-        const printBtnInstruction = document.getElementById('print-btn');
-        if (printBtnInstruction) {
-            printBtnInstruction.addEventListener('click', resetInactivityTimer);
-        }
-
-        const continuePrintBtn = document.getElementById('continue-print-btn');
-        if (continuePrintBtn) {
-            continuePrintBtn.addEventListener('click', resetInactivityTimer);
-        }
-
-        // Initialize timer on page load
-        resetInactivityTimer();
-
-        console.log('3-minute inactivity timer initialized on Upload instruction page');
     </script>
 
   @include('partials.emergency-check')
+  @include('partials.hide-url')
 </body>
 </html>
